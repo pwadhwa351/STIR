@@ -74,5 +74,9 @@ set(${dir_EXE_SOURCES}
 if (AVW_FOUND)
   list(APPEND ${dir_EXE_SOURCES}  conv_AVW)
 endif()
+if (HAVE_HDF)
+  list(APPEND ${dir_EXE_SOURCES} 
+	construct_randoms_from_GEsingles)
+endif()
 
 include(stir_exe_targets)
