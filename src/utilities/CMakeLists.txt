@@ -2,6 +2,7 @@
 #
 # Copyright 2011-01-01 - 2011-06-30 Hammersmith Imanet Ltd
 # Copyright 2011-07-01 - 2013 Kris Thielemans
+# Copyright 2017-2018 - Palak Wadhwa and University of Leeds
 
 # This file is part of STIR.
 #
