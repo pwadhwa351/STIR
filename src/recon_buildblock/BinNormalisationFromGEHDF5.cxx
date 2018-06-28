@@ -1,6 +1,7 @@
 /*
   Copyright (C) 2002-2011, Hammersmith Imanet Ltd
   Copyright (C) 2013-2014 University College London
+  Copyright (C) 2017-2018 University of Leeds
 
   This file contains is based on information supplied by Siemens but
   is distributed with their consent.
@@ -30,6 +31,7 @@
 
   \author Kris Thielemans
   \author Sanida Mustafovic
+  \author Palak Wadhwa
 */
 
 
