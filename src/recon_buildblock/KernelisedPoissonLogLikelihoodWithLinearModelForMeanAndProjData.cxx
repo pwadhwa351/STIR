@@ -1,6 +1,6 @@
+
 /*
-    Copyright (C) 2000 PARAPET partners
-    Copyright (C) 2000-2011, Hammersmith Imanet Ltd
+    Copyright (C) 2018 University of Leeds
     This file is part of STIR.
 
     This file is free software; you can redistribute it and/or modify
@@ -300,12 +300,6 @@ post_processing()
 
       this->set_kpnorm_sptr (normp_sptr);
       this->set_kmnorm_sptr (normm_sptr);
-      this->nkernel_sptr.reset (this->anatomical1_sptr->get_empty_copy ());
-
-      // calculate normalization for the kernel
-      calculate_normalization_kernel (*this->nkernel_sptr);
-      set_nkernel_sptr (nkernel_sptr);
-       // write_to_file("norm", *nkernel_sptr);
   }
   if (this->additive_projection_data_filename != "0")
   {
@@ -419,11 +413,6 @@ construct_target_ptr() const
 /***************************************************************
   get_ functions
 ***************************************************************/
-template <typename TargetT>
-const std::string
-KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::
-get_ksens_name() const
-{ return this->subsensitivity_filenames; }
 
 template <typename TargetT>
 const std::string
@@ -506,6 +495,7 @@ shared_ptr<TargetT> &KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProj
 template <typename TargetT >
 shared_ptr<TargetT> &KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::get_nkernel_sptr()
 { return this->nkernel_sptr; }
+
 
 template <typename TargetT>
 const ProjData&
@@ -628,6 +618,13 @@ set_kmnorm_sptr (shared_ptr<TargetT> &arg)
 }
 
 
+template<typename TargetT>
+void
+KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::
+set_anatomical1_sptr (shared_ptr<TargetT>& arg)
+{
+  this->anatomical1_sptr = arg;
+}
 
 template<typename TargetT>
 void
@@ -637,14 +634,6 @@ set_nkernel_sptr (shared_ptr<TargetT> &arg)
   this->nkernel_sptr = arg;
 }
 
-
-template<typename TargetT>
-void
-KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::
-set_anatomical1_sptr (shared_ptr<TargetT>& arg)
-{
-  this->anatomical1_sptr = arg;
-}
 
 
 template<typename TargetT>
@@ -677,7 +666,7 @@ void
 KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::
 set_additive_proj_data_sptr(const shared_ptr<ExamData> &arg)
 {
-    this->additive_proj_data_sptr = boost::dynamic_pointer_cast<ProjData>(arg);
+    this->additive_proj_data_sptr = dynamic_pointer_cast<ProjData>(arg);
 }
 
 template<typename TargetT>
@@ -717,7 +706,7 @@ void
 KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::
 set_input_data(const shared_ptr<ExamData> & arg)
 {
-    this->proj_data_sptr = boost::dynamic_pointer_cast<ProjData>(arg);
+    this->proj_data_sptr = dynamic_pointer_cast<ProjData>(arg);
 }
 
 /***************************************************************
@@ -863,95 +852,8 @@ set_up_before_sensitivity(shared_ptr<TargetT > const& target_sptr)
 /***************************************************************
   functions that compute the value/gradient of the objective function etc
 ***************************************************************/
-// Here start the definition of few funtion that calculate the SD of the anatomical1 image, a norm matrix and
+// Here start the definition of few functions that calculate the SD of the anatomical1 image, a norm matrix and
 // finally the Kernelised image
-
-template<typename TargetT>
-void
-KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::calculate_normalization_kernel(TargetT& nKernel)
-{
-
-         const DiscretisedDensityOnCartesianGrid<3,float>* current_anatomical1_cast =
-            dynamic_cast< const DiscretisedDensityOnCartesianGrid<3,float> *>(this->get_anatomical1_sptr ().get());
-         const CartesianCoordinate3D<float>& grid_spacing = current_anatomical1_cast->get_grid_spacing();
-
-         int min_dz, max_dz,min_dx,max_dx, min_dy,max_dy;
-
-          if (only_2D)
-            {
-              min_dz = max_dz = 0;
-            }
-          else
-            {
-              min_dz = -(neighbours_num-1)/2;
-              max_dz = (neighbours_num-1)/2;
-            }
-          min_dy = -(neighbours_num-1)/2;
-          max_dy = (neighbours_num-1)/2;
-          min_dx = -(neighbours_num-1)/2;
-          max_dx = (neighbours_num-1)/2;
-
-     Array<3,float> distance = Array<3,float>(IndexRange3D(min_dz,max_dz,min_dy,max_dy,min_dx,max_dx));
-
-          for (int z=min_dz;z<=max_dz;++z)
-            for (int y=min_dy;y<=max_dy;++y)
-              for (int x=min_dx;x<=max_dx;++x)
-                { // the distance is the euclidean distance:
-                  //at the moment is used only for the definition of the neighbourhood
-
-                      distance[z][y][x] =
-
-                        sqrt(square(x*grid_spacing.x())+
-                             square(y*grid_spacing.y())+
-                             square(z*grid_spacing.z()));
-                }
-
-   // get anatomical1 standard deviation over all voxels
-        double kSD=0;
-        kSD=get_kSD();
-
-   // calculate kernelised image
-
-                 const int min_z = (*anatomical1_sptr).get_min_index();
-                 const int max_z = (*anatomical1_sptr).get_max_index();
-
-                 for (int z=min_z; z<=max_z; z++)
-                   {
-                     const int min_dz = max(distance.get_min_index(), min_z-z);
-                     const int max_dz = min(distance.get_max_index(), max_z-z);
-
-                     const int min_y = (*anatomical1_sptr)[z].get_min_index();
-                     const int max_y = (*anatomical1_sptr)[z].get_max_index();
-
-                       for (int y=min_y;y<= max_y;y++)
-                         {
-                           const int min_dy = max(distance[0].get_min_index(), min_y-y);
-                           const int max_dy = min(distance[0].get_max_index(), max_y-y);
-
-                           const int min_x = (*anatomical1_sptr)[z][y].get_min_index();
-                           const int max_x = (*anatomical1_sptr)[z][y].get_max_index();
-
-
-          for (int x=min_x;x<= max_x;x++)
-                             {
-                               const int min_dx = max(distance[0][0].get_min_index(), min_x-x);
-                               const int max_dx = min(distance[0][0].get_max_index(), max_x-x);
-
-                               for (int dz=min_dz;dz<=max_dz;++dz)
-                                 for (int dy=min_dy;dy<=max_dy;++dy)
-                                   for (int dx=min_dx;dx<=max_dx;++dx)
-                                     {
-
-
-                               nKernel[z][y][x] += exp(-square(((*anatomical1_sptr)[z][y][x]-(*anatomical1_sptr)[z+dz][y+dy][x+dx])/kSD*kernel_par)/2)*exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(Nmdistance_par)));//(exp(-(*this->kmnorm_sptr)[0][l][0]/square(kSD*kernel_par)/2)*exp(-square(distance[dz][dy][dx]/grid_spacing.x ())));
- //std::cout<<"position z y x"<<z<<" "<<y<<" "<<nKernel[z][y][x]<<std::endl;
-                              }
-
-                          }
-                       }
-                 }
-//write_to_file("normK",nKernel);
-}
 
 template<typename TargetT>
 void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::calculate_norm_matrix(TargetT &normp,
@@ -1160,7 +1062,7 @@ for (int x=min_x;x<= max_x;x++)
                 }
 
 
-//the norms of the difference between feature vector related to the same neighbourhood are calculated now
+//the norms of the difference between feature vectors related to the same neighbourhood are calculated now
 int p=0,o=0;
 
     for (int q=0; q<=dimf_row-1; ++q){
@@ -1194,7 +1096,7 @@ void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::e
 {
     double kmean=0;
     double kStand_dev=0;
-    double dim_x=0, dim_y=0, dim_z=0;
+    double dim_z=0;
     int nv=0;
     const int min_z = (*anatomical1_sptr).get_min_index();
     const int max_z = (*anatomical1_sptr).get_max_index();
@@ -1206,16 +1108,18 @@ void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::e
 
             const int min_y = (*anatomical1_sptr)[z].get_min_index();
             const int max_y = (*anatomical1_sptr)[z].get_max_index();
+            double dim_y=0;
 
-             dim_y = max_y -min_y+1;
+            dim_y = max_y -min_y+1;
 
               for (int y=min_y;y<= max_y;y++)
                 {
 
                   const int min_x = (*anatomical1_sptr)[z][y].get_min_index();
                   const int max_x = (*anatomical1_sptr)[z][y].get_max_index();
+                  double dim_x=0;
 
-                   dim_x = max_x -min_x +1;
+                  dim_x = max_x -min_x +1;
 
                    this->num_voxels = dim_z*dim_y*dim_x;
 
@@ -1313,7 +1217,7 @@ void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::c
 
       int l=0,m=0, dimf_row=0;
       int dimf_col = this->num_non_zero_feat-1;
-      double kSD=0;
+      double kSD=0, pnkernel=0;
 
       kSD=this->get_kSD ();
 
@@ -1336,75 +1240,73 @@ void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::c
        const int max_z = current_estimate.get_max_index();
 
        for (int z=min_z; z<=max_z; z++)
-         { double pnkernel=0;
-           const int min_dz = max(distance.get_min_index(), min_z-z);
-           const int max_dz = min(distance.get_max_index(), max_z-z);
+       { double pnkernel=0, kAnatomical1=0;
+         const int min_dz = max(distance.get_min_index(), min_z-z);
+         const int max_dz = min(distance.get_max_index(), max_z-z);
 
-           const int min_y = current_estimate[z].get_min_index();
-           const int max_y = current_estimate[z].get_max_index();
+         const int min_y = current_estimate[z].get_min_index();
+         const int max_y = current_estimate[z].get_max_index();
 
 
-             for (int y=min_y;y<= max_y;y++)
-               {
-                 const int min_dy = max(distance[0].get_min_index(), min_y-y);
-                 const int max_dy = min(distance[0].get_max_index(), max_y-y);
+           for (int y=min_y;y<= max_y;y++)
+             {
+               const int min_dy = max(distance[0].get_min_index(), min_y-y);
+               const int max_dy = min(distance[0].get_max_index(), max_y-y);
 
-                 const int min_x = current_estimate[z][y].get_min_index();
-                 const int max_x = current_estimate[z][y].get_max_index();
+               const int min_x = current_estimate[z][y].get_min_index();
+               const int max_x = current_estimate[z][y].get_max_index();
 
 
 for (int x=min_x;x<= max_x;x++)
-                   {
-                     const int min_dx = max(distance[0][0].get_min_index(), min_x-x);
-                     const int max_dx = min(distance[0][0].get_max_index(), max_x-x);
+                 {
+                   const int min_dx = max(distance[0][0].get_min_index(), min_x-x);
+                   const int max_dx = min(distance[0][0].get_max_index(), max_x-x);
 
 
-                     l=(z-min_z)*(max_x-min_x +1)*(max_y-min_y +1) + (y-min_y)*(max_x-min_x +1) + (x-min_x);
+                   l=(z-min_z)*(max_x-min_x +1)*(max_y-min_y +1) + (y-min_y)*(max_x-min_x +1) + (x-min_x);
 
 
-                     for (int dz=min_dz;dz<=max_dz;++dz)
-                       for (int dy=min_dy;dy<=max_dy;++dy)
-                         for (int dx=min_dx;dx<=max_dx;++dx)
-                           {
-                             m=(dz-min_dz)*(max_dx-min_dx +1)*(max_dy-min_dy +1) + (dy-min_dy)*(max_dx-min_dx +1) + (dx-min_dx);
+                   for (int dz=min_dz;dz<=max_dz;++dz)
+                     for (int dy=min_dy;dy<=max_dy;++dy)
+                       for (int dx=min_dx;dx<=max_dx;++dx)
+                         {
+                           m=(dz-min_dz)*(max_dx-min_dx +1)*(max_dy-min_dy +1) + (dy-min_dy)*(max_dx-min_dx +1) + (dx-min_dx);
 
-                             if (get_hybrid()){
+                           if (get_hybrid()){
 
-                                 if(current_estimate[z][y][x]==0){
-                                      continue;
+                               if(current_estimate[z][y][x]==0){
+                                    continue;
 
-                                 }
-                                 else{
+                               }
+                               else{
 
-                                 kPET=exp(-(*this->kpnorm_sptr)[0][l][m]/square(current_estimate[z][y][x]*get_PETkernel_par())/2)*exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(get_Ndistance_par())));
+                               kPET=exp(-(*this->kpnorm_sptr)[0][l][m]/square(current_estimate[z][y][x]*get_PETkernel_par())/2)*
+                                    exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(get_Ndistance_par())));
 }
 
-                     }
-                     else{
-                         kPET=1;
- 
-                     }
+                   }
+                   else{
+                       kPET=1;
 
-                     kImage[z][y][x] += exp(-(*this->kmnorm_sptr)[0][l][m]/square(kSD*kernel_par)/2)*exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(Nmdistance_par)))*kPET*Image[z+dz][y+dy][x+dx];
+                   }
 
-                     pnkernel += exp(-(*this->kmnorm_sptr)[0][l][m]/square(kSD*kernel_par)/2)*exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(Nmdistance_par)))*kPET;
-                    }
-                     if(current_estimate[z][y][x]==0){
-//                                            std::cout<<"position z y x"<<z<<" "<<y<<" "<<x<<std::endl;
-                          continue;}
-                     kImage[z][y][x]=kImage[z][y][x]/pnkernel;
-                     pnkernel=0;
+                   kAnatomical1=exp(-(*this->kmnorm_sptr)[0][l][m]/square(kSD*kernel_par)/2)*
+                                exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(Nmdistance_par)));
+
+                   kImage[z][y][x] += kAnatomical1*kPET*Image[z+dz][y+dy][x+dx];
+
+                   pnkernel += kAnatomical1*kPET;
+                  }
+                   if(current_estimate[z][y][x]==0){
+                        continue;}
+
+                   kImage[z][y][x]=kImage[z][y][x]/pnkernel;
+                   pnkernel=0;
 
 
-                }
-             }
-       }
-
-//for Debug
-
-//      write_to_file("kImage", kImage);
-//      write_to_file("kPET", (*kPET_sptr));
-
+              }
+           }
+     }
 }
 
 
@@ -1423,7 +1325,6 @@ void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::f
      kImage=*current_estimate.get_empty_copy();
 //   write_to_file("kImage1", kImage);
 
-//write_to_file("nkernel", nkernel);
       const DiscretisedDensityOnCartesianGrid<3,float>* current_anatomical1_cast =
          dynamic_cast< const DiscretisedDensityOnCartesianGrid<3,float> *>(this->get_anatomical1_sptr ().get());
       const CartesianCoordinate3D<float>& grid_spacing = current_anatomical1_cast->get_grid_spacing();
@@ -1461,9 +1362,9 @@ void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::f
              }
 
 // get anatomical1 standard deviation over all voxels
-     double kSD=0;
+     double kSD=0, pnkernel=0, kAnatomical1=0;
      kSD=get_kSD();
-    double pnkernel=0;
+
 // calculate kernelised image
 
               const int min_z = (*anatomical1_sptr).get_min_index();
@@ -1471,7 +1372,6 @@ void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::f
 
               for (int z=min_z; z<=max_z; z++)
                 {
-
                   const int min_dz = max(distance.get_min_index(), min_z-z);
                   const int max_dz = min(distance.get_max_index(), max_z-z);
 
@@ -1499,38 +1399,36 @@ void KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<TargetT>::f
                                     if (get_hybrid()){
 
                                         if(current_estimate[z][y][x]==0){
-//                                            std::cout<<"position z y x"<<z<<" "<<y<<" "<<x<<std::endl;
                                              continue;
 
                                         }
                                         else{
 
-                                        kPET=exp(-square((current_estimate[z][y][x]-current_estimate[z+dz][y+dy][x+dx])/current_estimate[z][y][x]*get_PETkernel_par())/2)*exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(get_Ndistance_par())));//(exp(-(*this->kpnorm_sptr)[0][l][0]/square((current_estimate[z][y][x]*get_PETkernel_par()))/2)*exp(-square(distance[0][0][0]/grid_spacing.x ())/(2*square(get_Ndistance_par()))));
-//                                        std::cout <<z<<", "<<y<<", "<<this->get_subiter_num ()<<" = "<<current_estimate[z+dz][y+dy][x+dx]<<", "<<square((*anatomical1_sptr)[z][y][x]-(*anatomical1_sptr)[z+dz][y+dy][x+dx])<<std::endl;
-
+                                        kPET=exp(-square((current_estimate[z][y][x]-current_estimate[z+dz][y+dy][x+dx])/current_estimate[z][y][x]*get_PETkernel_par())/2)*
+                                             exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(get_Ndistance_par())));
                                         }
 
                             }
                             else{
                                 kPET=1;
-        //
-                            }
-                              pnkernel+=kPET;
-                              //std::cout<<"pnkernel "<<pnkernel<<" "<<kPET<<std::endl;
-                            kImage[z][y][x] += exp(-square(((*anatomical1_sptr)[z][y][x]-(*anatomical1_sptr)[z+dz][y+dy][x+dx])/kSD*kernel_par)/2)*exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(Nmdistance_par)))*kPET*Image[z+dz][y+dy][x+dx]/(*nkernel_sptr)[z][y][x];//
 
-                           }
-                            if(current_estimate[z][y][x]==0){
-//                                            std::cout<<"position z y x"<<z<<" "<<y<<" "<<x<<std::endl;
-                                 continue;}
-                             kImage[z][y][x]= kImage[z][y][x]/pnkernel;
-                             //std::cout<<"pnkernel "<<pnkernel<<" "<<kPET<<std::endl;
-                             pnkernel=0;
-                         }
+                            }  // the following "pnkernel" is the normalisation of the kernel
+                                    kAnatomical1=exp(-square(((*anatomical1_sptr)[z][y][x]-(*anatomical1_sptr)[z+dz][y+dy][x+dx])/kSD*kernel_par)/2)*
+                                                 exp(-square(distance[dz][dy][dx]/grid_spacing.x ())/(2*square(Nmdistance_par)));
+
+                                    pnkernel+=kPET*kAnatomical1;
+
+                                    kImage[z][y][x] += kAnatomical1*kPET*Image[z+dz][y+dy][x+dx];//
+
+                                   }
+                                    if(current_estimate[z][y][x]==0){
+                                         continue;}
+                                     kImage[z][y][x]= kImage[z][y][x]/pnkernel;
+                                     pnkernel=0;
+                       }
                     }
               }
 
-//write_to_file("kImage2", kImage);
 }
 
 
@@ -1578,7 +1476,7 @@ std::cout<<this->current_kimage_filename<<std::endl;
 
 
     const std::string current_sensitivity_filename =
-      boost::str(boost::format(this->subsensitivity_filenames) % subset_num);
+      boost::str(boost::format(this->get_subsensitivity_filenames ()) % subset_num);
 
     //if(get_subiter_num ()<=this->get_num_subsets()){
          shared_ptr<TargetT> sens_sptr(read_from_file<TargetT>(current_sensitivity_filename));

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2018, University of Leeds
+    Copyright (C) 2018 University of Leeds
     This file is part of STIR.
 
     This file is free software; you can redistribute it and/or modify
@@ -47,7 +47,6 @@ class DistributedCachingInformation;
 //#ifdef STIR_MPI_CLASS_DEFINITION
 //#define KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData_MPI
 //#endif
-
 
 
 /*!
@@ -116,11 +115,11 @@ class DistributedCachingInformation;
   Nmdistance_par:=1                          ;is the parameter $\f \sigma_{dm} \f$;
   Ndistance_par:=1                           ;is the parameter $\f \sigma_{dp} \f$;
   neighbours_num:= 3                         ;is the cubic root of the number of voxels in the neighbourhood;
-  anatomical_image_filename:=${filename}     ;is the filename of the anatomical image;
+  anatomical_image_filename:=filename        ;is the filename of the anatomical image;
   num_non_zero_feat_elements:=1              ;is the number of non zero elements in the feature vector;
   only_2D:=0                                 ;=1 if you want to reconstruct 2D images;
 
-  kernelised output filename prefix := ${kOUTPUT} ;this is  the name prefix for the reconstructed image after applying the kernel the reconstructed $\f \alpha \f$ coefficient.
+  kernelised output filename prefix := kOUTPUTprefix ;this is  the name prefix for the reconstructed image after applying the kernel the reconstructed $\f \alpha \f$ coefficient.
 
 
   maximum absolute segment number to process :=
@@ -220,8 +219,8 @@ public:
   const ProjectorByBinPair& get_projector_pair() const;
   const shared_ptr<ProjectorByBinPair>& get_projector_pair_sptr() const;
   const int get_time_frame_num() const;
+
   //kernel
-  const std::string get_ksens_name() const;
   const std::string get_anatomical1_filename() const;
   const int get_neighbours_num() const;
   const int get_num_non_zero_feat() const;
@@ -256,8 +255,8 @@ public:
   void set_kSD(double kSD);
   void set_kpnorm_sptr(shared_ptr<TargetT>&);
   void set_kmnorm_sptr(shared_ptr<TargetT>&);
-  void set_nkernel_sptr(shared_ptr<TargetT>&);
   void set_anatomical1_sptr(shared_ptr<TargetT>&);
+  void set_nkernel_sptr(shared_ptr<TargetT>&);
   void set_proj_data_sptr(const shared_ptr<ProjData>&);
   void set_max_segment_num_to_process(const int);
   void set_zero_seg0_end_planes(const bool);
@@ -335,8 +334,8 @@ protected:
  std::string anatomical1_image_filename;
   mutable Array<3,float> distance;
   double kSt_dev;
-  shared_ptr<TargetT> anatomical1_sptr;
-  shared_ptr<TargetT> kpnorm_sptr,kmnorm_sptr, nkernel_sptr;
+  shared_ptr<TargetT> anatomical1_sptr, nkernel_sptr;
+  shared_ptr<TargetT> kpnorm_sptr,kmnorm_sptr;
  //kernel parameters
   int neighbours_num,num_non_zero_feat,num_elem_neighbourhood,num_voxels,dimz,dimy,dimx;
   double kernel_par;
@@ -431,8 +430,6 @@ protected:
 
   void add_view_seg_to_sensitivity(TargetT& sensitivity, const ViewSegmentNumbers& view_seg_nums) const;
   friend void RPC_process_related_viewgrams_gradient();
-
-  void calculate_normalization_kernel(TargetT &nKernel);
 
 /*! Create a matrix containing the norm of the difference between two feature vectors, \f$ \|  \boldsymbol{z}^{(n)}_j-\boldsymbol{z}^{(n)}_l \| \f$. */
 /*! This is done for the PET image which keeps changing*/
