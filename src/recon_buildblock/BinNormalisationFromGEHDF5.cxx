@@ -1,37 +1,27 @@
 /*
   Copyright (C) 2002-2011, Hammersmith Imanet Ltd
   Copyright (C) 2013-2014 University College London
-  Copyright (C) 2017-2018 University of Leeds
-
   This file contains is based on information supplied by Siemens but
   is distributed with their consent.
-
   This file is free software; you can redistribute that part and/or modify
   it under the terms of the GNU Lesser General Public License as published by
   the Free Software Foundation; either version 2.1 of the License, or
   (at your option) any later version.
-
   This file is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU Lesser General Public License for more details.
-
   See STIR/LICENSE.txt for details
-
 */
 /*!
   \file
   \ingroup recon_buildblock
   \ingroup GE
-
   \brief Implementation for class stir::ecat::BinNormalisationFromGEHDF5
-
   This file is largely a copy of the ECAT7 version, but reading data via the Interfile-like header of GEHDF5.
   \todo merge ECAT7 and 8 code
-
   \author Kris Thielemans
   \author Sanida Mustafovic
-  \author Palak Wadhwa
 */
 
 
@@ -60,10 +50,10 @@ using std::ios;
 
 START_NAMESPACE_STIR
 
-	   
 
-const char * const 
-BinNormalisationFromGEHDF5::registered_name = "From GE HDF5"; 
+
+const char * const
+BinNormalisationFromGEHDF5::registered_name = "From GE HDF5";
 
 
 namespace detail
@@ -74,24 +64,24 @@ namespace detail
 //
 
 
-static 
+static
 int
-calc_ring1_plus_ring2(const Bin& bin, 
+calc_ring1_plus_ring2(const Bin& bin,
                       const ProjDataInfoCylindricalNoArcCorr *proj_data_cyl) {
 
   int segment_num = bin.segment_num();
- 
+
   const int min_ring_diff = proj_data_cyl->get_min_ring_difference(segment_num);
   const int max_ring_diff = proj_data_cyl->get_max_ring_difference(segment_num);
 
   const int num_rings = proj_data_cyl->get_scanner_ptr()->get_num_rings();
 
-  return( (2 * bin.axial_pos_num() - 
-           (proj_data_cyl->get_min_axial_pos_num(segment_num) + 
+  return( (2 * bin.axial_pos_num() -
+           (proj_data_cyl->get_min_axial_pos_num(segment_num) +
             proj_data_cyl->get_max_axial_pos_num(segment_num))
-           ) / (min_ring_diff != max_ring_diff ? 2 : 1) 
+           ) / (min_ring_diff != max_ring_diff ? 2 : 1)
           + num_rings - 1 );
-  
+
 }
 
 
@@ -99,17 +89,17 @@ calc_ring1_plus_ring2(const Bin& bin,
 static
 void
 set_detection_tangential_coords(shared_ptr<ProjDataInfoCylindricalNoArcCorr> proj_data_cyl_uncomp,
-                                const Bin& uncomp_bin, 
+                                const Bin& uncomp_bin,
                                 DetectionPositionPair<>& detection_position_pair) {
   int det1_num=0;
   int det2_num=0;
-  
+
   proj_data_cyl_uncomp->get_det_num_pair_for_view_tangential_pos_num(det1_num, det2_num,
                                                                      uncomp_bin.view_num(),
                                                                      uncomp_bin.tangential_pos_num());
   detection_position_pair.pos1().tangential_coord() = det1_num;
   detection_position_pair.pos2().tangential_coord() = det2_num;
-  
+
 }
 
 
@@ -122,25 +112,25 @@ int
 set_detection_axial_coords(const ProjDataInfoCylindricalNoArcCorr *proj_data_info_cyl,
                            int ring1_plus_ring2, const Bin& uncomp_bin,
                            DetectionPositionPair<>& detection_position_pair) {
-  
+
   const int num_rings = proj_data_info_cyl->get_scanner_ptr()->get_num_rings();
 
   const int ring_diff = uncomp_bin.segment_num();
 
   const int ring1 = (ring1_plus_ring2 - ring_diff)/2;
   const int ring2 = (ring1_plus_ring2 + ring_diff)/2;
-  
+
   if (ring1<0 || ring2 < 0 || ring1>=num_rings || ring2 >= num_rings) {
     return(-1);
   }
-        
+
   assert((ring1_plus_ring2 + ring_diff)%2 == 0);
   assert((ring1_plus_ring2 - ring_diff)%2 == 0);
-  
+
   detection_position_pair.pos1().axial_coord() = ring1;
   detection_position_pair.pos2().axial_coord() = ring2;
 
-  
+
   return(ring1 + ring2);
 }
 
@@ -157,7 +147,7 @@ set_detection_axial_coords(const ProjDataInfoCylindricalNoArcCorr *proj_data_inf
 
 
 
-void 
+void
 BinNormalisationFromGEHDF5::set_defaults()
 {
   this->normalisation_GEHDF5_filename = "";
@@ -165,10 +155,10 @@ BinNormalisationFromGEHDF5::set_defaults()
   this->_use_detector_efficiencies = true;
   this->_use_dead_time = false;
   this->_use_geometric_factors =false;
-  this->_use_crystal_interference_factors = false;  
+  this->_use_crystal_interference_factors = false;
 }
 
-void 
+void
 BinNormalisationFromGEHDF5::
 initialise_keymap()
 {
@@ -183,7 +173,7 @@ initialise_keymap()
   this->parser.add_stop_key("End Bin Normalisation From GE HDF5");
 }
 
-bool 
+bool
 BinNormalisationFromGEHDF5::
 post_processing()
 {
@@ -223,8 +213,8 @@ set_up(const shared_ptr<ProjDataInfo>& proj_data_info_ptr_v)
     return Succeeded::no;
   }
 
-  span = 
-    proj_data_info_cyl_ptr->get_max_ring_difference(0) - 
+  span =
+    proj_data_info_cyl_ptr->get_max_ring_difference(0) -
     proj_data_info_cyl_ptr->get_min_ring_difference(0) + 1;
   // TODO insert check all other segments are the same
 
@@ -237,36 +227,36 @@ void
 BinNormalisationFromGEHDF5::
 read_norm_data(const string& filename)
 {
-  
+
   this->h5data.open(filename);
   this->scanner_ptr = this->h5data.get_scanner_sptr();
 
   num_transaxial_crystals_per_block = scanner_ptr->get_num_transaxial_crystals_per_block();
-  // Calculate the number of axial blocks per singles unit and 
+  // Calculate the number of axial blocks per singles unit and
   // total number of blocks per singles unit.
-  int axial_crystals_per_singles_unit = 
+  int axial_crystals_per_singles_unit =
     scanner_ptr->get_num_axial_crystals_per_singles_unit();
-  
+
   int transaxial_crystals_per_singles_unit =
     scanner_ptr->get_num_transaxial_crystals_per_singles_unit();
-  
-  int axial_crystals_per_block = 
+
+  int axial_crystals_per_block =
     scanner_ptr->get_num_axial_crystals_per_block();
 
   int transaxial_crystals_per_block =
     scanner_ptr->get_num_transaxial_crystals_per_block();
-  
+
   // Axial blocks.
-  num_axial_blocks_per_singles_unit = 
+  num_axial_blocks_per_singles_unit =
     axial_crystals_per_singles_unit / axial_crystals_per_block;
-  
-  int transaxial_blocks_per_singles_unit = 
+
+  int transaxial_blocks_per_singles_unit =
     transaxial_crystals_per_singles_unit / transaxial_crystals_per_block;
-  
+
   // Total blocks.
-  num_blocks_per_singles_unit = 
+  num_blocks_per_singles_unit =
     num_axial_blocks_per_singles_unit * transaxial_blocks_per_singles_unit;
-  
+
 
 #if 0
   if (scanner_ptr->get_num_rings() != nrm_subheader_ptr->num_crystal_rings)
@@ -280,28 +270,28 @@ read_norm_data(const string& filename)
 #endif
   proj_data_info_cyl_uncompressed_ptr.reset(
     dynamic_cast<ProjDataInfoCylindricalNoArcCorr *>(
-    ProjDataInfo::ProjDataInfoCTI(scanner_ptr, 
+    ProjDataInfo::ProjDataInfoCTI(scanner_ptr,
                   /*span=*/1, scanner_ptr->get_num_rings()-1,
                   /*num_views,=*/scanner_ptr->get_num_detectors_per_ring()/2,
-				  /*num_tangential_poss=*/scanner_ptr->get_max_num_non_arccorrected_bins(), 
+                  /*num_tangential_poss=*/scanner_ptr->get_max_num_non_arccorrected_bins(),
                   /*arc_corrected =*/false)
-						     ));
-  
+                             ));
+
   /*
     Extract geometrical & crystal interference, and crystal efficiencies from the
-    normalisation data.    
+    normalisation data.
   */
 
    const int min_tang_pos_num = -(scanner_ptr->get_max_num_non_arccorrected_bins())/2;
    const int max_tang_pos_num = min_tang_pos_num +scanner_ptr->get_max_num_non_arccorrected_bins()- 1;
 
-   //geometric_factors = 
+   //geometric_factors =
    //  Array<2,float>(IndexRange2D(0,127-1, //XXXXnrm_subheader_ptr->num_geo_corr_planes-1,
    //                             min_tang_pos_num, max_tang_pos_num));
   efficiency_factors =
     Array<2,float>(IndexRange2D(0,scanner_ptr->get_num_rings()-1,
-		   0, scanner_ptr->get_num_detectors_per_ring()-1));
-  
+           0, scanner_ptr->get_num_detectors_per_ring()-1));
+
 
   {
     using namespace H5;
@@ -354,7 +344,7 @@ read_norm_data(const string& filename)
       std::copy(data.begin(), data.end(), efficiency_factors.begin_all());
   }
 
-  
+
 #if 1
    // to test pipe the obtained values into file
     ofstream out_geom;
@@ -368,7 +358,7 @@ read_norm_data(const string& filename)
     {
       for ( int j =geometric_factors[i].get_min_index(); j <=geometric_factors[i].get_max_index(); j++)
       {
-	 out_geom << geometric_factors[i][j] << "   " ;
+     out_geom << geometric_factors[i][j] << "   " ;
       }
       out_geom << std::endl;
     }
@@ -378,7 +368,7 @@ read_norm_data(const string& filename)
    {
       for ( int j =crystal_interference_factors[i].get_min_index(); j <=crystal_interference_factors[i].get_max_index(); j++)
       {
-	 out_inter << crystal_interference_factors[i][j] << "   " ;
+     out_inter << crystal_interference_factors[i][j] << "   " ;
       }
       out_inter << std::endl;
    }
@@ -387,7 +377,7 @@ read_norm_data(const string& filename)
    {
       for ( int j =efficiency_factors[i].get_min_index(); j <=efficiency_factors[i].get_max_index(); j++)
       {
-	 out_eff << efficiency_factors[i][j] << "   " ;
+     out_eff << efficiency_factors[i][j] << "   " ;
       }
       out_eff << std::endl<< std::endl;
    }
@@ -401,28 +391,28 @@ read_norm_data(const string& filename)
 #endif
 }
 
-bool 
+bool
 BinNormalisationFromGEHDF5::
 use_detector_efficiencies() const
 {
   return this->_use_detector_efficiencies;
 }
 
-bool 
+bool
 BinNormalisationFromGEHDF5::
 use_dead_time() const
 {
   return this->_use_dead_time;
 }
 
-bool 
+bool
 BinNormalisationFromGEHDF5::
 use_geometric_factors() const
 {
   return this->_use_geometric_factors;
 }
 
-bool 
+bool
 BinNormalisationFromGEHDF5::
 use_crystal_interference_factors() const
 {
@@ -430,7 +420,7 @@ use_crystal_interference_factors() const
 }
 
 #if 1
-float 
+float
 BinNormalisationFromGEHDF5::
 get_bin_efficiency(const Bin& bin, const double start_time, const double end_time) const {
 
@@ -449,9 +439,9 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
     */
   const float geo_Z_corr = 1;
 
-  
+
   float	total_efficiency = 0 ;
-  
+
   /* Correct dead time */
   const int start_view = bin.view_num() * mash ;
   //SM removed bin.view_num() + mash ;
@@ -461,14 +451,14 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
   const int max_ring_diff = proj_data_info_cyl_ptr->get_max_ring_difference(bin.segment_num());
 
 
-  /* 
-     ring1_plus_ring2 is the same for any ring pair that contributes to 
+  /*
+     ring1_plus_ring2 is the same for any ring pair that contributes to
      this particular bin.segment_num(), bin.axial_pos_num().
      We determine it first here. See ProjDataInfoCylindrical for the
      relevant formulas
   */
-  const int ring1_plus_ring2 = detail::calc_ring1_plus_ring2(bin, proj_data_info_cyl_ptr); 
-                                                      
+  const int ring1_plus_ring2 = detail::calc_ring1_plus_ring2(bin, proj_data_info_cyl_ptr);
+
 
 
   DetectionPositionPair<> detection_position_pair;
@@ -484,12 +474,12 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
         ++uncompressed_bin.view_num() ) {
 
       detail::set_detection_tangential_coords(proj_data_info_cyl_uncompressed_ptr,
-					      uncompressed_bin, detection_position_pair);
+                          uncompressed_bin, detection_position_pair);
 
-      
-        
-      float lor_efficiency= 0.;   
-      
+
+
+      float lor_efficiency= 0.;
+
       /*
         loop over ring differences that contribute to bin.segment_num() at the current
         bin.axial_pos_num().
@@ -504,15 +494,15 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
         == (2*min_ring_diff+ring1_plus_ring2)%2
         == ring1_plus_ring2%2
       */
-      for(uncompressed_bin.segment_num() = min_ring_diff + (min_ring_diff+ring1_plus_ring2)%2; 
-          uncompressed_bin.segment_num() <= max_ring_diff; 
+      for(uncompressed_bin.segment_num() = min_ring_diff + (min_ring_diff+ring1_plus_ring2)%2;
+          uncompressed_bin.segment_num() <= max_ring_diff;
           uncompressed_bin.segment_num()+=2 ) {
-        
-        
-        int geo_plane_num = 
-	  detail::set_detection_axial_coords(proj_data_info_cyl_ptr,
-					     ring1_plus_ring2, uncompressed_bin,
-					     detection_position_pair);
+
+
+        int geo_plane_num =
+      detail::set_detection_axial_coords(proj_data_info_cyl_ptr,
+                         ring1_plus_ring2, uncompressed_bin,
+                         detection_position_pair);
         if ( geo_plane_num < 0 ) {
           // Ring numbers out of range.
           continue;
@@ -522,69 +512,69 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
 #ifndef NDEBUG
         Bin check_bin;
         check_bin.set_bin_value(bin.get_bin_value());
-        assert(proj_data_info_cyl_ptr->get_bin_for_det_pos_pair(check_bin, 
+        assert(proj_data_info_cyl_ptr->get_bin_for_det_pos_pair(check_bin,
                                                                 detection_position_pair) ==
                Succeeded::yes);
         assert(check_bin == bin);
 #endif
-        
+
          const DetectionPosition<>& pos1 = detection_position_pair.pos1();
         const DetectionPosition<>& pos2 = detection_position_pair.pos2();
 
-	float lor_efficiency_this_pair = 1.F;
-	if (this->use_detector_efficiencies())
-	  {
-	    lor_efficiency_this_pair =
-              efficiency_factors[44-pos1.axial_coord()][pos1.tangential_coord()] *
-              efficiency_factors[44-pos2.axial_coord()][pos2.tangential_coord()];
-	  }
-	if (this->use_dead_time())
-	  {
-	    lor_efficiency_this_pair *=
-	      get_dead_time_efficiency(pos1, start_time, end_time) * 
-	      get_dead_time_efficiency(pos2, start_time, end_time);
-	  }
-	if (this->use_geometric_factors())
-	  {
-	    lor_efficiency_this_pair *=
+    float lor_efficiency_this_pair = 1.F;
+    if (this->use_detector_efficiencies())
+      {
+        lor_efficiency_this_pair =
+          efficiency_factors[pos1.axial_coord()][pos1.tangential_coord()] *
+          efficiency_factors[pos2.axial_coord()][pos2.tangential_coord()];
+      }
+    if (this->use_dead_time())
+      {
+        lor_efficiency_this_pair *=
+          get_dead_time_efficiency(pos1, start_time, end_time) *
+          get_dead_time_efficiency(pos2, start_time, end_time);
+      }
+    if (this->use_geometric_factors())
+      {
+        lor_efficiency_this_pair *=
 #ifdef SAME_AS_PETER
               1.F;
 #else	    // this is 3dbkproj (at the moment)
-	    geometric_factors[geo_plane_num][uncompressed_bin.tangential_pos_num()];
+        geometric_factors[geo_plane_num][uncompressed_bin.tangential_pos_num()];
 #endif
-	  }
-	lor_efficiency += lor_efficiency_this_pair;
+      }
+    lor_efficiency += lor_efficiency_this_pair;
       }
 
       if (this->use_crystal_interference_factors())
-	{
-	  view_efficiency += lor_efficiency * 
-	    crystal_interference_factors[uncompressed_bin.tangential_pos_num()][uncompressed_bin.view_num()%num_transaxial_crystals_per_block] ;
-	}
-      else
-	{
-	  view_efficiency += lor_efficiency;
-	}
+    {
+      view_efficiency += lor_efficiency *
+        crystal_interference_factors[uncompressed_bin.tangential_pos_num()][uncompressed_bin.view_num()%num_transaxial_crystals_per_block] ;
     }
-    
+      else
+    {
+      view_efficiency += lor_efficiency;
+    }
+    }
+
     if (this->use_geometric_factors())
       {
-	/* z==bin.get_axial_pos_num() only when min_axial_pos_num()==0*/
-	// for oblique plaanes use the single radial profile from segment 0 
-	
-#ifdef SAME_AS_PETER	
-	const int geo_plane_num = 0;
-	
-	total_efficiency += view_efficiency * 
-	  geometric_factors[geo_plane_num][uncompressed_bin.tangential_pos_num()]  * 
-	  geo_Z_corr;
+    /* z==bin.get_axial_pos_num() only when min_axial_pos_num()==0*/
+    // for oblique plaanes use the single radial profile from segment 0
+
+#ifdef SAME_AS_PETER
+    const int geo_plane_num = 0;
+
+    total_efficiency += view_efficiency *
+      geometric_factors[geo_plane_num][uncompressed_bin.tangential_pos_num()]  *
+      geo_Z_corr;
 #else
-	total_efficiency += view_efficiency * geo_Z_corr;
+    total_efficiency += view_efficiency * geo_Z_corr;
 #endif
       }
     else
       {
-	total_efficiency += view_efficiency;
+    total_efficiency += view_efficiency;
       }
   }
   return total_efficiency;
@@ -592,19 +582,18 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
 #endif
 
 
-float 
+float
 BinNormalisationFromGEHDF5::get_dead_time_efficiency (const DetectionPosition<>& det_pos,
-						    const double start_time,
-						    const double end_time) const
+                            const double start_time,
+                            const double end_time) const
 {
   if (is_null_ptr(singles_rates_ptr)) {
     return 1;
   }
 
-  return 1;  
+  return 1;
 }
 
 
 
 END_NAMESPACE_STIR
-
