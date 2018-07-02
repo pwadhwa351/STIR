@@ -356,7 +356,6 @@ Calculate number of time slices from the length of the data (file size minus hea
 
   while ( slice < _num_time_slices) {
 
-std::cout<<"Now processing sample"<< slice+1 <<std::endl;
 
 //PW Open the dataset from that file here.	
  char datasetname[300];
