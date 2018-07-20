@@ -72,6 +72,12 @@ set(${dir_EXE_SOURCES}
 	find_ML_singles_from_delayed
 )
 
+if (HDF5_FOUND)
+ list(APPEND ${dir_LIB_SOURCES}
+    construct_randoms_from_GEsingles
+ )
+endif()
+
 if (AVW_FOUND)
   list(APPEND ${dir_EXE_SOURCES}  conv_AVW)
 endif()
