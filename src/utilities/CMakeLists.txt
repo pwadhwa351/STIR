@@ -70,7 +70,6 @@ set(${dir_EXE_SOURCES}
 	find_ML_normfactors3D
 	find_ML_normfactors
 	find_ML_singles_from_delayed
-construct_randoms_from_GEsingles
 )
 
 if (AVW_FOUND)
