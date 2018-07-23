@@ -41,6 +41,7 @@ set(${dir_EXE_SOURCES}
         list_detector_and_bin_info
 	find_maxima_in_image 
 	create_projdata_template 
+        invert_axis
 	SSRB 
 	poisson_noise 
 	get_time_frame_info 
@@ -67,16 +68,12 @@ set(${dir_EXE_SOURCES}
 	apply_normfactors3D
 	apply_normfactors
 	construct_randoms_from_singles
+	construct_randoms_from_GEsingles
 	find_ML_normfactors3D
 	find_ML_normfactors
 	find_ML_singles_from_delayed
 )
 
-if (HDF5_FOUND)
- list(APPEND ${dir_LIB_SOURCES}
-    construct_randoms_from_GEsingles
- )
-endif()
 
 if (AVW_FOUND)
   list(APPEND ${dir_EXE_SOURCES}  conv_AVW)
