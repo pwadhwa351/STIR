@@ -155,7 +155,7 @@ class LORCylindricalCoordinates_z_and_radius
     }
   coordT _radius;
 
- protected:
+private:
   coordT _z1;
   coordT _z2;
 };

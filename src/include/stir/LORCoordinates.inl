@@ -12,7 +12,6 @@
 */
 /*
     Copyright (C) 2004- 2013, Hammersmith Imanet Ltd
-    Copyright (C) 2018, University College London
     This file is part of STIR.
 
     This file is free software; you can redistribute it and/or modify
@@ -30,7 +29,7 @@
 
 #include "stir/modulo.h"
 #include "stir/Succeeded.h"
-#include <algorithm>
+
 START_NAMESPACE_STIR
 
 /********************************************************************
@@ -92,13 +91,8 @@ LORInAxialAndSinogramCoordinates(const coordT z1,
 				 const coordT radius)
   :
   LORCylindricalCoordinates_z_and_radius<coordT>(z1, z2, radius),
-  _phi(to_0_2pi(phi)), _s(s)
+   _phi(phi), _s(s)
 {
-  if (_phi>=_PI)
-    {
-      _phi -= coordT(_PI); _s = -_s;
-      std::swap(private_base_type::_z1,private_base_type::_z2);
-    }
   check_state();
 }
 
@@ -120,14 +114,9 @@ LORInAxialAndNoArcCorrSinogramCoordinates(const coordT z1,
 				   const coordT beta,
 				   const coordT radius)
   : LORCylindricalCoordinates_z_and_radius<coordT>(z1, z2, radius),
-   _phi(to_0_2pi(phi)), _beta(beta)
+   _phi(phi), _beta(beta)
   
 {
-  if (_phi>=_PI)
-    {
-      _phi -= coordT(_PI); _beta = -_beta;
-      std::swap(private_base_type::_z1,private_base_type::_z2);
-    }
   check_state();
 }
 
