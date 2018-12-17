@@ -38,6 +38,9 @@
 #include "stir/stream.h"
 #include "stir/Sinogram.h"
 #include "stir/IndexRange2D.h"
+#include "stir/IO/HDF5Wrapper.h"
+#include "stir/Array.h"
+#include "stir/RegisteredParsingObject.h"
 #include "stir/display.h"
 #include <iostream>
 #include <fstream>
@@ -102,13 +105,11 @@ int main(int argc, char **argv)
   DetectorEfficiencies efficiencies(IndexRange2D(num_rings, num_detectors_per_ring));
 
   {
-
+      SinglesRatesFromGEHDF5  singles;
+      singles.read_singles_from_listmode_file(_listmode_filename);
     // efficiencies
     if (do_eff)
       {
-
-        SinglesRatesFromGEHDF5  singles;
-        singles.read_singles_from_listmode_file(_listmode_filename);
         //singles.write(std::cout);
 
         for (int r=0; r<num_rings; ++r)
@@ -117,11 +118,7 @@ int main(int argc, char **argv)
                 DetectionPosition<> pos(c,r,0);
                 double time_init = 0.;
                 int time_final = static_cast<double>(singles.get_num_time_slices());
-
-                //efficiencies[r][c]=singles.get_singles_rate(pos, time_init, time_final);
-                efficiencies[r][c]=((singles.get_num_time_slices()-2)*singles.get_singles_rate(pos, time_init+1, time_final-1)+
-                                        (singles.get_singles_rate(pos,time_init,time_init+1))*(0.383)+
-                                        (singles.get_singles_rate(pos, time_final-1,time_final))*(1-0.383))/singles.get_num_time_slices();
+                efficiencies[r][c]=singles.get_singles_rate(pos, time_init, time_final);
             }
        // int timesamples=singles._num_time_slices;
       }
@@ -175,6 +172,10 @@ int main(int argc, char **argv)
                     /*arccorrection=*/false));
 
 
+
+    shared_ptr<HDF5Wrapper> m_input_sptr;
+    m_input_sptr.reset(new HDF5Wrapper(_listmode_filename));
+    int num_slices = m_input_sptr->get_timeframe_definitions()->get_num_frames();
 
     Bin bin;
     Bin uncompressed_bin;
@@ -232,15 +233,14 @@ int main(int argc, char **argv)
 
                 int ra = 0, a = 0;
                 int rb = 0, b = 0;
-                SinglesRatesFromGEHDF5 singles;
-                int num_slices = singles.get_num_time_slices();
                 uncompressed_proj_data_info_ptr->get_det_pair_for_bin(a, ra, b, rb,
                                               uncompressed_bin);
 
+                float coincidence_time_window = 0.00000000457f;
                 /*(*segment_ptr)[bin.axial_pos_num()]*/
                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
-                (num_slices)*0.00000000457*efficiencies[ra][447-a]*efficiencies[rb][447-b%num_detectors_per_ring];
-                  }
+                num_slices*coincidence_time_window*efficiencies[ra][447-a]*efficiencies[rb][447-b%num_detectors_per_ring];
+                }
               }
               }
 
