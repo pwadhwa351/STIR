@@ -427,7 +427,7 @@ const int    RANK_OUT = 2;
       dataset.read( _singles[slice].get_data_ptr(), H5::PredType::NATIVE_INT, memspace, dataspace );
       _singles[slice].release_data_ptr();
 
-
+std::cout<<slice<<" :This is the slice number."<<std::endl;
  // Increment the slice index.
     ++slice;
     
@@ -513,7 +513,6 @@ get_singles_rate(const int singles_bin_index,
         
     fraction = included_duration / old_duration;
        
-    
     // Set the total number of contributing bins to this fraction.
     total_slices = fraction;
     
@@ -542,9 +541,7 @@ get_singles_rate(const int singles_bin_index,
     for(int slice = start_slice + 1; slice < end_slice ; ++slice, total_slices += 1.0) {
       total_singles += _singles[slice][singles_bin_index];
     }
-    
-    
-    // Divide by total amount of contributing slices.
+     // Divide by total amount of contributing slices.
     total_singles = total_singles / total_slices;
        
   }

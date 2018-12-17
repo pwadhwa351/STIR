@@ -118,7 +118,10 @@ int main(int argc, char **argv)
                 double time_init = 0.;
                 int time_final = static_cast<double>(singles.get_num_time_slices());
 
-                efficiencies[r][c]=singles.get_singles_rate(pos, time_init, time_final);
+                //efficiencies[r][c]=singles.get_singles_rate(pos, time_init, time_final);
+                efficiencies[r][c]=((singles.get_num_time_slices()-2)*singles.get_singles_rate(pos, time_init+1, time_final-1)+
+                                        (singles.get_singles_rate(pos,time_init,time_init+1))*(0.383)+
+                                        (singles.get_singles_rate(pos, time_final-1,time_final))*(1-0.383))/singles.get_num_time_slices();
             }
        // int timesamples=singles._num_time_slices;
       }
@@ -236,7 +239,7 @@ int main(int argc, char **argv)
 
                 /*(*segment_ptr)[bin.axial_pos_num()]*/
                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
-                num_slices*0.00000000457*efficiencies[ra][447-a]*efficiencies[rb][447-b%num_detectors_per_ring];
+                (num_slices)*0.00000000457*efficiencies[ra][447-a]*efficiencies[rb][447-b%num_detectors_per_ring];
                   }
               }
               }

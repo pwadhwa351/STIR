@@ -47,7 +47,7 @@
 #include "stir/display.h"
 #include "stir/IO/read_data.h"
 #include "stir/IO/InterfileHeader.h"
-#include "stir/ByteOrder.h"
+
 #include "stir/is_null_ptr.h"
 #include <algorithm>
 #include <fstream>
@@ -536,8 +536,8 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
 	if (this->use_detector_efficiencies())
 	  {
 	    lor_efficiency_this_pair =
-          efficiency_factors[pos1.axial_coord()][447-pos1.tangential_coord()] *
-          efficiency_factors[pos2.axial_coord()][447-pos2.tangential_coord()];
+          (efficiency_factors[pos1.axial_coord()][447-pos1.tangential_coord()] *
+          efficiency_factors[pos2.axial_coord()][447-pos2.tangential_coord()]);
 	  }
 	if (this->use_dead_time())
 	  {
@@ -567,7 +567,7 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
 	  view_efficiency += lor_efficiency;
 	}
     }
-    
+
     if (this->use_geometric_factors())
       {
 	/* z==bin.get_axial_pos_num() only when min_axial_pos_num()==0*/
