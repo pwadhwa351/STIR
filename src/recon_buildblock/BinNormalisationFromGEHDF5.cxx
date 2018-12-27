@@ -329,20 +329,20 @@ read_norm_data(const string& filename)
            m_input_hdf5_sptr->get_from_2d_dataset(offset, count, stride, block, tmp);
 
            std::copy(tmp.begin(),tmp.end(), ret_array[i_view].begin_all());
-
+}
            //PW Flip view and tangential positions here.
            for(int view_num = proj_data_info_cyl_uncompressed_ptr->get_min_view_num(); view_num <= proj_data_info_cyl_uncompressed_ptr->get_max_view_num(); ++view_num)
-           for (int tang_pos = proj_data_info_cyl_uncompressed_ptr->get_min_tangential_pos_num(); tang_pos <= proj_data_info_cyl_uncompressed_ptr->get_max_tangential_pos_num(); ++tang_pos)
-           for(int axial_pos = 0; axial_pos <= max_num_axial_poss; axial_pos++)
+           for (int tang_pos = proj_data_info_cyl_uncompressed_ptr->get_min_tangential_pos_num(), i_tang = 0; tang_pos <= proj_data_info_cyl_uncompressed_ptr->get_max_tangential_pos_num(), i_tang<=max_num_tangential_poss-1; ++tang_pos, ++i_tang)
+           for(int axial_pos = 0; axial_pos <= max_num_axial_poss-1; axial_pos++)
             {
-              geometric_factors[224-view_num][axial_pos][-tang_pos] = ret_array[view_num][axial_pos][tang_pos];
+              geometric_factors[223-view_num][axial_pos][-tang_pos] = ret_array[view_num][axial_pos][i_tang];
             }
 
             //PW Currently the scale factors are hardcorded.
             //! \todo Get these from HDF5 file.
              geometric_factors *= 2.2110049e-4;
           }
-    }
+
 
     efficiency_factors =
     Array<2,float>(IndexRange2D(0,scanner_ptr->get_num_rings()-1,
