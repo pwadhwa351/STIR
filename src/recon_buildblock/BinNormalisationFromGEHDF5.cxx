@@ -301,7 +301,7 @@ read_norm_data(const string& filename)
    const unsigned int max_num_axial_poss = 1981;
    const unsigned int max_num_tangential_poss = 357;
 
-    geometric_factors =
+ /*   geometric_factors =
     Array<3,float>(IndexRange3D(0, max_num_view_num-1, 0, max_num_axial_poss-1, //XXXXnrm_subheader_ptr->num_geo_corr_planes-1,
                                  min_tang_pos_num, max_tang_pos_num));
    {
@@ -343,7 +343,7 @@ read_norm_data(const string& filename)
              geometric_factors *= 2.2110049e-4;
           }
 
-
+*/
     efficiency_factors =
     Array<2,float>(IndexRange2D(0,scanner_ptr->get_num_rings()-1,
            0, scanner_ptr->get_num_detectors_per_ring()-1));
