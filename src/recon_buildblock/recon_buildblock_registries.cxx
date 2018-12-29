@@ -24,6 +24,7 @@
 */
 #include "stir/DiscretisedDensity.h"
 #include "stir/recon_buildblock/PoissonLogLikelihoodWithLinearModelForMeanAndProjData.h"
+#include "stir/recon_buildblock/KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData.h"
 #include "stir/recon_buildblock/PoissonLogLikelihoodWithLinearModelForMeanAndListModeDataWithProjMatrixByBin.h"
 
 #include "stir/recon_buildblock/FilterRootPrior.h"
@@ -80,6 +81,7 @@ START_NAMESPACE_STIR
 //static RegisterInputFileFormat<InterfileProjMatrixByBinInputFileFormat> idummy0(0);
 
 static PoissonLogLikelihoodWithLinearModelForMeanAndProjData<DiscretisedDensity<3,float> >::RegisterIt dummy1;
+static KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData<DiscretisedDensity<3,float> >::RegisterIt DummyKS;
 static PoissonLogLikelihoodWithLinearModelForMeanAndListModeDataWithProjMatrixByBin<DiscretisedDensity<3,float> >::RegisterIt dummy2;
 
 static FilterRootPrior<DiscretisedDensity<3,float> >::RegisterIt dummy4;

@@ -73,6 +73,7 @@ set(${dir_LIB_SOURCES}
 	PoissonLogLikelihoodWithLinearModelForMean 
 	PoissonLogLikelihoodWithLinearModelForMeanAndProjData 
 	PoissonLogLikelihoodWithLinearModelForMeanAndListModeData 
+	KernelisedPoissonLogLikelihoodWithLinearModelForMeanAndProjData
 	PoissonLogLikelihoodWithLinearModelForMeanAndListModeDataWithProjMatrixByBin 
         PoissonLogLikelihoodWithLinearKineticModelAndDynamicProjectionData	
         PoissonLogLikelihoodWithLinearModelForMeanAndGatedProjDataWithMotion
