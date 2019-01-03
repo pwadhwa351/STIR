@@ -37,7 +37,7 @@
 #include "stir/data/SinglesRates.h"
 #include "stir/Scanner.h"
 #include "stir/Array.h"
-#include "stir/IO/HDF5Wrapper.h"
+#include "stir/IO/GEHDF5Data.h"
 #include <string>
 
 #ifndef STIR_NO_NAMESPACE
@@ -94,7 +94,6 @@ public:
   virtual Succeeded set_up(const shared_ptr<ProjDataInfo>&);
   float get_bin_efficiency(const Bin& bin, const double start_time, const double end_time) const;
 
-  float undo();
   bool use_detector_efficiencies() const;
   bool use_dead_time() const;
   bool use_geometric_factors() const;
@@ -105,10 +104,9 @@ private:
   Array<1,float> axial_t2_array;
   Array<1,float> trans_t1_array;
   shared_ptr<SinglesRates> singles_rates_ptr;
-  Array<3,float> geometric_factors;
+  Array<2,float> geometric_factors;
   Array<2,float> efficiency_factors;
   Array<2,float> crystal_interference_factors;
-  Array<3, float> ret_array;
   shared_ptr<Scanner> scanner_ptr;
   int num_transaxial_crystals_per_block;
   // TODO move to Scanner
@@ -136,8 +134,8 @@ private:
   virtual bool post_processing();
 
   string normalisation_GEHDF5_filename;
-  shared_ptr<HDF5Wrapper> m_input_hdf5_sptr;
-  HDF5Wrapper h5data;
+  
+  GEHDF5Data h5data;
 };
 
 END_NAMESPACE_STIR
