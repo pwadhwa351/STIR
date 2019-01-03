@@ -80,8 +80,8 @@ std::cout<<" the axis to invert is "<< name<<std::endl;
                         }
                     }
                   else if (name=="y"){
-                        if((max_y%2)==0)
-                        {
+                       // if((max_y%2)==0)
+                       // {
 
                         //std::cout<<" image "<< image[0][-172][171]<<std::endl;
                         //if (image[z][-y-1][x]==image[0][-172][171]){
@@ -90,13 +90,13 @@ std::cout<<" the axis to invert is "<< name<<std::endl;
                            // image[z][-y-1][x]=0;
                             //std::cout<<" image "<< image[z][-y-1][x]<<std::endl;
                        // }
-                        output[z][y][x]=image[z][-y-1][x];
+                        output[z][y][x]=image[z][-y][x];
                     }
-                        else
-                        {
-                            output[z][y][x]=image[z][-y][x];
-                        }
-                    }
+                      //  else
+                      //  {
+                      //      output[z][y][x]=image[z][-y][x];
+                      //  }
+                  //  }
                     else if (name=="z"){
                         //std::cout<<" pos "<< z<< " "<<max_z-z <<" "<<y<<std::endl;
                         output[z][y][x]=image[max_z-z][y][x];

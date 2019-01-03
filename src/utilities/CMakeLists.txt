@@ -45,6 +45,7 @@ set(${dir_EXE_SOURCES}
 	get_time_frame_info 
 	generate_image 
 	list_ROI_values 
+	invert_axis
 	zoom_image 
 	find_fwhm_in_image 
 	abs_image 
