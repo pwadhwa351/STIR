@@ -283,9 +283,9 @@ read_norm_data(const string& filename)
   proj_data_info_cyl_uncompressed_ptr.reset(
     dynamic_cast<ProjDataInfoCylindricalNoArcCorr *>(
     ProjDataInfo::ProjDataInfoCTI(scanner_ptr,
-                  /*span=*/1, scanner_ptr->get_num_rings()-1,
+                  /*span=*/2, scanner_ptr->get_num_rings()-1,
                   /*num_views,=*/scanner_ptr->get_num_detectors_per_ring()/2,
-                  /*num_tangential_poss=*/scanner_ptr->get_max_num_non_arccorrected_bins(),
+                  /*num_tangential_poss=*/357,
                   /*arc_corrected =*/false)
                              ));
 
@@ -301,7 +301,7 @@ read_norm_data(const string& filename)
    const unsigned int max_num_axial_poss = 1981;
    const unsigned int max_num_tangential_poss = 357;
 
- /*   geometric_factors =
+    geometric_factors =
     Array<3,float>(IndexRange3D(0, max_num_view_num-1, 0, max_num_axial_poss-1, //XXXXnrm_subheader_ptr->num_geo_corr_planes-1,
                                  min_tang_pos_num, max_tang_pos_num));
    {
@@ -343,7 +343,7 @@ read_norm_data(const string& filename)
              geometric_factors *= 2.2110049e-4;
           }
 
-*/
+
     efficiency_factors =
     Array<2,float>(IndexRange2D(0,scanner_ptr->get_num_rings()-1,
            0, scanner_ptr->get_num_detectors_per_ring()-1));
@@ -489,7 +489,8 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
   {
 
     float view_efficiency = 0.;
-
+    std::cout<<start_view<<"This is the start view"<<std::endl;
+    std::cout<<end_view<<"This is the end view"<<std::endl;
 
     for(uncompressed_bin.view_num() = start_view;
         uncompressed_bin.view_num() < end_view;
@@ -556,43 +557,16 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
 	      get_dead_time_efficiency(pos1, start_time, end_time) * 
 	      get_dead_time_efficiency(pos2, start_time, end_time);
 	  }
-	if (this->use_geometric_factors())
-	  {
-	    lor_efficiency_this_pair *=
-#ifdef SAME_AS_PETER
-              1.F;
-#else	    // this is 3dbkproj (at the moment)
-        1/geometric_factors[uncompressed_bin.view_num()][geo_plane_num][uncompressed_bin.tangential_pos_num()];
-#endif
-	  }
 	lor_efficiency += lor_efficiency_this_pair;
       }
 
-      if (this->use_crystal_interference_factors())
-	{
-	  view_efficiency += lor_efficiency * 
-	    crystal_interference_factors[uncompressed_bin.tangential_pos_num()][uncompressed_bin.view_num()%num_transaxial_crystals_per_block] ;
-	}
-      else
-	{
 	  view_efficiency += lor_efficiency;
-	}
+
     }
     
     if (this->use_geometric_factors())
       {
-	/* z==bin.get_axial_pos_num() only when min_axial_pos_num()==0*/
-	// for oblique plaanes use the single radial profile from segment 0 
-	
-#ifdef SAME_AS_PETER	
-	const int geo_plane_num = 0;
-	
-	total_efficiency += view_efficiency * 
-	  geometric_factors[geo_plane_num][uncompressed_bin.tangential_pos_num()]  * 
-	  geo_Z_corr;
-#else
-	total_efficiency += view_efficiency * geo_Z_corr;
-#endif
+    total_efficiency += view_efficiency/geometric_factors[uncompressed_bin.view_num()][bin.axial_pos_num()][bin.tangential_pos_num()];
       }
     else
       {
