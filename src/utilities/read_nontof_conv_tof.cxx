@@ -81,7 +81,7 @@ int main(int argc,char **argv)
 
     ProjDataInterfile proj_data(template_projdata_ptr->get_exam_info_sptr(), template_projdata_ptr->get_proj_data_info_sptr(),
                                 output_filename, std::ios::out);
-    shared_ptr<ProjDataInfo> proj_data_non_tof_info_sptr = ProjData::read_from_file(argv[2]);
+    shared_ptr<ProjDataInfo> proj_data_non_tof_info_sptr = ProjData::read_from_file(argv[2])->get_proj_data_info_sptr();
     shared_ptr<ProjData> proj_data_non_tof_ptr = ProjData::read_from_file(argv[2]);
 
     Bin bin;

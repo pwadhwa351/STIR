@@ -49,7 +49,8 @@ set(${dir_EXE_SOURCES}
 	find_fwhm_in_image 
 	abs_image 
         convert_to_binary_image 
-	rebin_projdata 
+	rebin_projdata
+	read_nontof_conv_tof 
 	write_proj_matrix_by_bin 
         forward_project
         back_project
