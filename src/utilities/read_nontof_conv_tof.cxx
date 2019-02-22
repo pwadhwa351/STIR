@@ -112,8 +112,8 @@ int main(int argc,char **argv)
                  ++bin.tangential_pos_num())
               {
                 /*(*segment_ptr)[bin.axial_pos_num()]*/
-                sinogram[bin.view_num()][bin.tangential_pos_num()] =
-                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]/template_projdata_info_sptr->get_max_tof_pos_num();
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]/template_projdata_info_sptr->get_num_tof_poss();
                 }
               }
 
