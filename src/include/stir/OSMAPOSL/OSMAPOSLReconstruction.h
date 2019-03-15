@@ -4,6 +4,7 @@
     Copyright (C) 2000 PARAPET partners
     Copyright (C) 2000 - 2007-10-08, Hammersmith Imanet Ltd
     Copyright (C) 2012-06-05 - 2012, Kris Thielemans
+    Copyright (C) 2018 Commonwealth Scientific and Industrial Research Organisation
     This file is part of STIR.
 
     This file is free software; you can redistribute it and/or modify
@@ -25,6 +26,8 @@
 
   \author Matthew Jacobson
   \author Kris Thielemans
+  \author Ashley Gillman
+  \author Daniel Deidda
   \author PARAPET project
 
 */
@@ -37,18 +40,18 @@
 
 START_NAMESPACE_STIR
 
-template <typename TargetT> 
+template <typename TargetT>
 class PoissonLogLikelihoodWithLinearModelForMean;
 
 /*! \ingroup OSMAPOSL
-  \brief Implementation of the Ordered Subsets version of Green's 
+  \brief Implementation of the Ordered Subsets version of Green's
   MAP One Step Late algorithm.
-  
+
   See Jacobson et al, PMB for a description of the implementation.
 
   When no prior info is specified, this reduces to 'standard' OSEM.
 
-  Two different forms of the prior are implemented. 
+  Two different forms of the prior are implemented.
   (For background, see Mustavic&Thielemans, proc. IEEE MIC 2001).
 
   When MAP_model == "additive" this implements the standard form of OSL
@@ -57,7 +60,7 @@ class PoissonLogLikelihoodWithLinearModelForMean;
    lambda_new = lambda / ((p_v + beta*prior_gradient)/ num_subsets) *
                    sum_subset backproj(measured/forwproj(lambda))
    \endcode
-   with \f$p_v = sum_b p_{bv}\f$.   
+   with \f$p_v = sum_b p_{bv}\f$.
    actually, we restrict 1 + beta*prior_gradient/p_v between .1 and 10
 
   On the other hand, when MAP_model == "multiplicative" it implements
@@ -67,11 +70,11 @@ class PoissonLogLikelihoodWithLinearModelForMean;
   \endcode
    with \f$p_v = sum_b p_{bv}\f$.
    actually, we restrict 1 + beta*prior_gradient between .1 and 10.
-  
 
-  Note that all this assumes 'balanced subsets', i.e. 
-  
-    \f[\sum_{b \in \rm{subset}} p_{bv} = 
+
+  Note that all this assumes 'balanced subsets', i.e.
+
+    \f[\sum_{b \in \rm{subset}} p_{bv} =
        { \sum_b p_{bv} \over \rm{numsubsets} } \f]
 
   \warning This class should be the last in a Reconstruction hierarchy.
@@ -103,14 +106,14 @@ public:
   \brief Constructor, initialises everything from parameter file, or (when
   parameter_filename == "") by calling ask_parameters().
   */
-  explicit 
+  explicit
     OSMAPOSLReconstruction(const std::string& parameter_filename);
 
   //! accessor for the external parameters
   OSMAPOSLReconstruction& get_parameters(){return *this; }
 
   //! accessor for the external parameters
-  const OSMAPOSLReconstruction& get_parameters() const 
+  const OSMAPOSLReconstruction& get_parameters() const
     {return *this;}
 
   //! gives method information
@@ -125,11 +128,11 @@ public:
 
   /*! \name Functions to set parameters
     This can be used as alternative to the parsing mechanism.
-   \warning Be careful with setting shared pointers. If you modify the objects in 
+   \warning Be careful with setting shared pointers. If you modify the objects in
    one place, all objects that use the shared pointer will be affected.
   */
   //@{
-  //! subiteration interval at which to apply inter-update filters 
+  //! subiteration interval at which to apply inter-update filters
   void set_inter_update_filter_interval(const int);
 
   //! inter-update filter object
@@ -140,18 +143,21 @@ public:
 
   //! restrict updates (smaller relative updates will be thresholded)
   void set_minimum_relative_change(const double);
-  
+
   //! boolean value to determine if the update images have to be written to disk
   void set_write_update_image(const int);
 
   //! should be either additive or multiplicative
-  void set_MAP_model(const std::string&); 
+  void set_MAP_model(const std::string&);
   //@}
 
   //! prompts the user to enter parameter values manually
   virtual void ask_parameters();
 
  protected:
+
+  //! operations prior to the iterations
+  virtual Succeeded set_up(shared_ptr <TargetT > const& target_image_ptr);
 
   //! determines whether non-positive values in the initial image will be set to small positive ones
   bool enforce_initial_positivity;
@@ -162,7 +168,7 @@ public:
   */
   bool do_rim_truncation;
 
-  //! subiteration interval at which to apply inter-update filters 
+  //! subiteration interval at which to apply inter-update filters
   int inter_update_filter_interval;
 
   //! inter-update filter object
@@ -175,12 +181,12 @@ public:
 
   //! restrict updates (smaller relative updates will be thresholded)
   double minimum_relative_change;
-  
+
   //! boolean value to determine if the update images have to be written to disk
   int write_update_image;
 
   //! should be either additive or multiplicative
-  std::string MAP_model; 
+  std::string MAP_model;
 
   virtual void set_defaults();
   virtual void initialise_keymap();
@@ -188,13 +194,19 @@ public:
   //! used to check acceptable parameter ranges, etc...
   virtual bool post_processing();
 
- 
+  void compute_sub_gradient_without_penalty_plus_sensitivity(
+    TargetT& gradient, const TargetT &current_estimate, const int subset_num);
+
+  const TargetT& get_subset_sensitivity(const int subset_num);
+
+  void apply_multiplicative_update(
+    TargetT& current_image_estimate, const TargetT& multiplicative_update_image);
+
 private:
+
   friend void do_sensitivity(const char * const par_filename);
 
-  //! operations prior to the iterations
-  virtual Succeeded set_up(shared_ptr <TargetT > const& target_image_ptr);
- 
+
   //! the principal operations for updating the image iterates at each iteration
   virtual void update_estimate (TargetT& current_image_estimate);
 
@@ -203,6 +215,8 @@ private:
 
   PoissonLogLikelihoodWithLinearModelForMean<TargetT > const&
     objective_function() const;
+
+  unique_ptr<TargetT> multiplicative_update_image_ptr;
 };
 
 END_NAMESPACE_STIR

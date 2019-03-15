@@ -4,6 +4,7 @@
     Copyright (C) 2000 PARAPET partners
     Copyright (C) 2000 - 2011-12-31, Hammersmith Imanet Ltd
     Copyright (C) 2012-06-05 - 2012, Kris Thielemans
+    Copyright (C) 2018 Commonwealth Scientific and Industrial Research Organisation
     This file is part of STIR.
 
     This file is free software; you can redistribute it and/or modify
@@ -21,15 +22,16 @@
 
 /*!
   \file
-  \ingroup OSMAPOSL  
+  \ingroup OSMAPOSL
   \ingroup reconstructors
-  \brief  implementation of the stir::OSMAPOSLReconstruction class 
-    
+  \brief  implementation of the stir::OSMAPOSLReconstruction class
+
   \author Matthew Jacobson
   \author Sanida Mustafovic
   \author Kris Thielemans
+  \author Ashley Gillman
+  \author Daniel Deidda
   \author PARAPET project
-      
 */
 
 #include "stir/OSMAPOSL/OSMAPOSLReconstruction.h"
@@ -82,7 +84,7 @@ PoissonLogLikelihoodWithLinearModelForMean<TargetT >&
 OSMAPOSLReconstruction<TargetT>::
 objective_function()
 {
-  return   
+  return
     static_cast<PoissonLogLikelihoodWithLinearModelForMean<TargetT >&>
     (*this->objective_function_sptr);
 }
@@ -92,7 +94,7 @@ PoissonLogLikelihoodWithLinearModelForMean<TargetT > const&
 OSMAPOSLReconstruction<TargetT>::
 objective_function() const
 {
-  return   
+  return
     static_cast<PoissonLogLikelihoodWithLinearModelForMean<TargetT >&>
     (*this->objective_function_sptr);
 }
@@ -109,7 +111,7 @@ get_objective_function() const
 //*********** parameters ***********
 
 template <typename TargetT>
-void 
+void
 OSMAPOSLReconstruction<TargetT>::
 set_defaults()
 {
@@ -120,7 +122,7 @@ set_defaults()
   write_update_image = 0;
   inter_update_filter_interval = 0;
   inter_update_filter_ptr.reset();
-  MAP_model="additive"; 
+  MAP_model="additive";
 }
 
 template <typename TargetT>
@@ -139,7 +141,7 @@ initialise_keymap()
   this->parser.add_key("MAP_model", &this->MAP_model);
   this->parser.add_key("maximum relative change", &this->maximum_relative_change);
   this->parser.add_key("minimum relative change",&this->minimum_relative_change);
-  this->parser.add_key("write update image",&this->write_update_image);   
+  this->parser.add_key("write update image",&this->write_update_image);
 }
 
 
@@ -156,30 +158,30 @@ ask_parameters()
   inter_update_filter_interval=
     ask_num("Do inter-update filtering at sub-iteration intervals of: ",
             0, this->num_subiterations, 0);
-     
+
   if(inter_update_filter_interval>0)
-  {       
-    
+  {
+
     cerr<<endl<<"Supply inter-update filter type:\nPossible values:\n";
     DataProcessor<TargetT >::list_registered_names(cerr);
-    
+
     const std::string inter_update_filter_type = ask_string("");
-    
+
     inter_update_filter_ptr.reset(DataProcessor<TargetT >::read_registered_object(0, inter_update_filter_type));
-    
-  } 
+
+  }
 
   if (!this->objective_function_sptr->prior_is_zero())
-    MAP_model = 
+    MAP_model =
       ask_string("Use additive or multiplicative form of MAP-OSL ('additive' or 'multiplicative')","additive");
-  
+
   // KT 17/08/2000 3 new parameters
   const double max_in_double = static_cast<double>(NumericInfo<float>().max_value());
   maximum_relative_change = ask_num("maximum relative change",
       1.,max_in_double,max_in_double);
   minimum_relative_change = ask_num("minimum relative change",
       0.,1.,0.);
-  
+
   write_update_image = ask_num("write update image", 0,1,0);
 
 }
@@ -239,7 +241,7 @@ set_minimum_relative_change(const double arg)
 {
   this->minimum_relative_change  = arg;
 }
-  
+
 template <typename TargetT>
 void
 OSMAPOSLReconstruction<TargetT>::
@@ -263,20 +265,20 @@ set_MAP_model(const std::string& arg)
 template <typename TargetT>
 OSMAPOSLReconstruction<TargetT>::
 OSMAPOSLReconstruction()
-{  
+{
   set_defaults();
 }
 
 template <typename TargetT>
 OSMAPOSLReconstruction<TargetT>::
 OSMAPOSLReconstruction(const std::string& parameter_filename)
-{  
+{
   this->initialise(parameter_filename);
   info(this->parameter_info());
 }
 
 template <typename TargetT>
-std::string 
+std::string
 OSMAPOSLReconstruction<TargetT>::
 method_info() const
 {
@@ -304,11 +306,11 @@ method_info() const
 }
 
 template <typename TargetT>
-Succeeded 
+Succeeded
 OSMAPOSLReconstruction<TargetT>::
 set_up(shared_ptr <TargetT > const& target_image_ptr)
 {
-  // TODO should use something like iterator_traits to figure out the 
+  // TODO should use something like iterator_traits to figure out the
   // type instead of hard-wiring float
   static const float small_num = 0.000001F;
 
@@ -331,27 +333,27 @@ set_up(shared_ptr <TargetT > const& target_image_ptr)
   } // end check balancing
 
 
-  if(this->enforce_initial_positivity) 
-    threshold_min_to_small_positive_value(target_image_ptr->begin_all(), 
-                                          target_image_ptr->end_all(), 
+  if(this->enforce_initial_positivity)
+    threshold_min_to_small_positive_value(target_image_ptr->begin_all(),
+                                          target_image_ptr->end_all(),
                                           small_num);
 
   if (this->inter_update_filter_interval<0)
     { error("Range error in inter-update filter interval"); return Succeeded::no; }
 
-  if(this->inter_update_filter_interval>0 && 
+  if(this->inter_update_filter_interval>0 &&
      !is_null_ptr(this->inter_update_filter_ptr))
     {
       // ensure that the result image of the filter is positive
       shared_ptr<ThresholdMinToSmallPositiveValueDataProcessor<TargetT > >
-	thresholding_sptr(new  ThresholdMinToSmallPositiveValueDataProcessor<TargetT >);
+    thresholding_sptr(new  ThresholdMinToSmallPositiveValueDataProcessor<TargetT >);
       this->inter_update_filter_ptr.reset(
         new ChainedDataProcessor<TargetT >(
                                   this->inter_update_filter_ptr,
                                   thresholding_sptr));
-      // KT 04/06/2003 moved set_up after chaining the filter. Otherwise it would be 
+      // KT 04/06/2003 moved set_up after chaining the filter. Otherwise it would be
       // called again later on anyway.
-      // Note however that at present, 
+      // Note however that at present,
       info("Building inter-update filter kernel");
       if (this->inter_update_filter_ptr->set_up(*target_image_ptr)
           == Succeeded::no)
@@ -361,17 +363,17 @@ set_up(shared_ptr <TargetT > const& target_image_ptr)
         }
 
     }
-  if (this->inter_iteration_filter_interval>0 && 
+  if (this->inter_iteration_filter_interval>0 &&
       !is_null_ptr(this->inter_iteration_filter_ptr))
     {
       // ensure that the result image of the filter is positive
       shared_ptr<ThresholdMinToSmallPositiveValueDataProcessor<TargetT > >
-	thresholding_sptr(new  ThresholdMinToSmallPositiveValueDataProcessor<TargetT >);
+    thresholding_sptr(new  ThresholdMinToSmallPositiveValueDataProcessor<TargetT >);
       this->inter_iteration_filter_ptr.reset(
         new ChainedDataProcessor<TargetT >(
                                            this->inter_iteration_filter_ptr,
                                            thresholding_sptr
-					   ));
+                       ));
       // KT 04/06/2003 moved set_up after chaining the filter (and removed it from IterativeReconstruction)
       info("Building inter-iteration filter kernel");
       if (this->inter_iteration_filter_ptr->set_up(*target_image_ptr)
@@ -382,21 +384,62 @@ set_up(shared_ptr <TargetT > const& target_image_ptr)
         }
 
     }
+
+  // initialise mutliplicative update to zeros
+  multiplicative_update_image_ptr = unique_ptr<TargetT>(target_image_ptr->get_empty_copy());
+
   return Succeeded::yes;
 }
 
 
+template <typename TargetT>
+void
+OSMAPOSLReconstruction<TargetT>::
+compute_sub_gradient_without_penalty_plus_sensitivity(
+  TargetT& gradient, const TargetT& current_estimate, const int subset_num)
+{
+  this->objective_function().compute_sub_gradient_without_penalty_plus_sensitivity(
+      gradient, current_estimate, subset_num);
+};
 
 
 template <typename TargetT>
-void 
+const TargetT&
+OSMAPOSLReconstruction<TargetT>::get_subset_sensitivity(const int subset_num)
+{
+  return this->objective_function().get_subset_sensitivity(subset_num);
+};
+
+
+template <typename TargetT>
+void
+OSMAPOSLReconstruction<TargetT>::apply_multiplicative_update(
+  TargetT& current_image_estimate, const TargetT& multiplicative_update_image)
+{
+  typename TargetT::const_full_iterator multiplicative_update_image_iter =
+    multiplicative_update_image.begin_all_const();
+  const typename TargetT::const_full_iterator end_multiplicative_update_image_iter =
+    multiplicative_update_image.end_all_const();
+  typename TargetT::full_iterator current_image_estimate_iter =
+    current_image_estimate.begin_all();
+  while (multiplicative_update_image_iter != end_multiplicative_update_image_iter)
+  {
+    *current_image_estimate_iter *= (*multiplicative_update_image_iter);
+    ++current_image_estimate_iter;
+    ++multiplicative_update_image_iter;
+  }
+}
+
+
+template <typename TargetT>
+void
 OSMAPOSLReconstruction<TargetT>::
 update_estimate(TargetT &current_image_estimate)
 {
-  // TODO should use something like iterator_traits to figure out the 
+  // TODO should use something like iterator_traits to figure out the
   // type instead of hard-wiring float
   static const float small_num = 0.000001F;
-  
+
 #ifndef PARALLEL
   //CPUTimer subset_timer;
   //subset_timer.start();
@@ -404,46 +447,37 @@ update_estimate(TargetT &current_image_estimate)
   PTimer timerSubset;
   timerSubset.Start();
 #endif // PARALLEL
-  
-  // TODO make member parameter to avoid reallocation all the time
-  unique_ptr< TargetT > multiplicative_update_image_ptr
-    (current_image_estimate.get_empty_copy());
 
-  const int subset_num=this->get_subset_num();  
+  const int subset_num=this->get_subset_num();
   info(boost::format("Now processing subset #: %1%") % subset_num);
 
-  this->objective_function().
-    compute_sub_gradient_without_penalty_plus_sensitivity(*multiplicative_update_image_ptr,
-                                                          current_image_estimate,
-                                                          subset_num); 
-  
-  // divide by subset sensitivity  
-  {
-    const TargetT& sensitivity =
-      this->objective_function().get_subset_sensitivity(subset_num);
+  this->compute_sub_gradient_without_penalty_plus_sensitivity(
+      *multiplicative_update_image_ptr, current_image_estimate, subset_num);
 
+  // divide by subset sensitivity
+  {
+    const TargetT& sensitivity = this->get_subset_sensitivity(subset_num);
 
     int count = 0;
-    
+
     //std::cerr <<this->MAP_model << std::endl;
-    
+
   if (this->objective_function_sptr->prior_is_zero())
     {
       divide(multiplicative_update_image_ptr->begin_all(),
-             multiplicative_update_image_ptr->end_all(), 
+             multiplicative_update_image_ptr->end_all(),
              sensitivity.begin_all(),
              small_num);
-        
     }
     else
     {
       unique_ptr< TargetT > denominator_ptr
         (current_image_estimate.get_empty_copy());
-      
-      
+
+
       this->objective_function_sptr->
-        get_prior_ptr()->compute_gradient(*denominator_ptr, current_image_estimate); 
-      
+        get_prior_ptr()->compute_gradient(*denominator_ptr, current_image_estimate);
+
       typename TargetT::full_iterator denominator_iter = denominator_ptr->begin_all();
       const typename TargetT::full_iterator denominator_end = denominator_ptr->end_all();
       typename TargetT::const_full_iterator sensitivity_iter = sensitivity.begin_all();
@@ -485,25 +519,25 @@ update_estimate(TargetT &current_image_estimate)
             ++sensitivity_iter;
           }
         }
-      }         
+      }
       divide(multiplicative_update_image_ptr->begin_all(),
-             multiplicative_update_image_ptr->end_all(), 
+             multiplicative_update_image_ptr->end_all(),
              denominator_ptr->begin_all(),
              small_num);
     }
-    
+
     info(boost::format("Number of (cancelled) singularities in Sensitivity division: %1%") % count);
   }
-  
-    
+
+
   if(this->inter_update_filter_interval>0 &&
      !is_null_ptr(this->inter_update_filter_ptr) &&
      !(this->subiteration_num%this->inter_update_filter_interval))
   {
     info("Applying inter-update filter");
-    this->inter_update_filter_ptr->apply(current_image_estimate); 
+    this->inter_update_filter_ptr->apply(current_image_estimate);
   }
-  
+
   // KT 17/08/2000 limit update
   // TODO move below thresholding?
   if (this->write_update_image && !this->_disable_output)
@@ -512,57 +546,42 @@ update_estimate(TargetT &current_image_estimate)
     // we never have more than 10^49 subiterations ...
     char * fname = new char[this->output_filename_prefix.size() + 60];
     sprintf(fname, "%s_update_%d", this->output_filename_prefix.c_str(), this->subiteration_num);
-    
+
     // Write it to file
     this->output_file_format_ptr->
       write_to_file(fname, *multiplicative_update_image_ptr);
     delete[] fname;
   }
-  
+
   if (this->subiteration_num != 1)
     {
       const float current_min =
         *std::min_element(multiplicative_update_image_ptr->begin_all(),
-                          multiplicative_update_image_ptr->end_all()); 
-      const float current_max = 
+                          multiplicative_update_image_ptr->end_all());
+      const float current_max =
         *std::max_element(multiplicative_update_image_ptr->begin_all(),
-                          multiplicative_update_image_ptr->end_all()); 
-      const float new_min = 
+                          multiplicative_update_image_ptr->end_all());
+      const float new_min =
         static_cast<float>(this->minimum_relative_change);
-      const float new_max = 
+      const float new_max =
         static_cast<float>(this->maximum_relative_change);
       info(boost::format("Update image old min,max: %1%, %2%, new min,max %3%, %4%") % current_min % current_max % (min(current_min, new_min)) % (max(current_max, new_max)));
 
       threshold_upper_lower(multiplicative_update_image_ptr->begin_all(),
-                            multiplicative_update_image_ptr->end_all(), 
-                            new_min, new_max);      
-    }  
+                            multiplicative_update_image_ptr->end_all(),
+                            new_min, new_max);
+    }
 
-  //current_image_estimate *= *multiplicative_update_image_ptr; 
-  {
-    typename TargetT::const_full_iterator multiplicative_update_image_iter = multiplicative_update_image_ptr->begin_all_const(); 
-    const typename TargetT::const_full_iterator end_multiplicative_update_image_iter = multiplicative_update_image_ptr->end_all_const(); 
-    typename TargetT::full_iterator current_image_estimate_iter = current_image_estimate.begin_all(); 
-    while (multiplicative_update_image_iter!=end_multiplicative_update_image_iter) 
-      { 
-        *current_image_estimate_iter *= (*multiplicative_update_image_iter); 
-        ++current_image_estimate_iter; ++multiplicative_update_image_iter; 
-      } 
-  }
-  
-#ifndef PARALLEL
-  //cerr << "Subset : " << subset_timer.value() << "secs " <<endl;
-#else // PARALLEL
+  //current_image_estimate *= *multiplicative_update_image_ptr;
+  apply_multiplicative_update(current_image_estimate, *multiplicative_update_image_ptr);
+
+#ifdef PARALLEL
   timerSubset.Stop();
   info(boost::format("Subset: %1%secs") % timerSubset.GetTime());
 #endif
-  
 }
 
 template class OSMAPOSLReconstruction<DiscretisedDensity<3,float> >;
-template class OSMAPOSLReconstruction<ParametricVoxelsOnCartesianGrid >; 
-
+template class OSMAPOSLReconstruction<ParametricVoxelsOnCartesianGrid >;
 
 END_NAMESPACE_STIR
-
-
