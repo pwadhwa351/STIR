@@ -113,6 +113,8 @@ post_processing()
   if (is_null_ptr(this->output_file_format_ptr))
     { warning("output file format has to be set to valid value"); return true; }
 
+  if ((this->disable_output)&(this->get_registered_name()=="KOSMAPOSL"))
+    { warning("You have disabled the alpha coefficient output. Only PET image files will be written to" "disk after or during reconstruction");}
   return false;
 }
 
