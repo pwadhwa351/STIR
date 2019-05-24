@@ -28,7 +28,6 @@
 #include "stir/IO/read_data.h"
 #include "stir/Succeeded.h"
 #include "stir/NumericType.h"
-#include "stir/IO/HDF5Wrapper.h"
 #include "stir/IndexRange3D.h"
 #include "stir/DetectionPosition.h"
 #include "stir/DetectionPositionPair.h"
