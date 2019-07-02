@@ -44,6 +44,7 @@ set(${dir_EXE_SOURCES}
 	poisson_noise 
 	get_time_frame_info 
 	generate_image 
+	invert_axis
 	list_ROI_values 
 	zoom_image 
 	find_fwhm_in_image 
