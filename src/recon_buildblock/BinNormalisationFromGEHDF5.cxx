@@ -283,7 +283,7 @@ read_norm_data(const string& filename)
   proj_data_info_cyl_uncompressed_ptr.reset(
     dynamic_cast<ProjDataInfoCylindricalNoArcCorr *>(
     ProjDataInfo::ProjDataInfoCTI(scanner_ptr,
-                  /*span=*/2, scanner_ptr->get_num_rings()-1,
+                  /*span=*/1, scanner_ptr->get_num_rings()-1,
                   /*num_views,=*/scanner_ptr->get_num_detectors_per_ring()/2,
                   /*num_tangential_poss=*/357,
                   /*arc_corrected =*/false)
@@ -342,7 +342,8 @@ read_norm_data(const string& filename)
             //! \todo Get these from HDF5 file.
              geometric_factors *= 2.2110049e-4;
           }
-
+ //   for ()
+//geometric_factors[view][uncompressed_bin.axial_pos][uncompressed_bin.tangential_pos] = geometric_factors[view][bin.axial_pos][bin.tangential_pos];
 
     efficiency_factors =
     Array<2,float>(IndexRange2D(0,scanner_ptr->get_num_rings()-1,
@@ -521,7 +522,7 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
           uncompressed_bin.segment_num() <= max_ring_diff; 
           uncompressed_bin.segment_num()+=2 ) {
         
-        
+        std::cout<<uncompressed_bin.segment_num()<<std::endl;
         int geo_plane_num = 
 	  detail::set_detection_axial_coords(proj_data_info_cyl_ptr,
 					     ring1_plus_ring2, uncompressed_bin,
@@ -566,7 +567,8 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
     
     if (this->use_geometric_factors())
       {
-    total_efficiency += view_efficiency/geometric_factors[uncompressed_bin.view_num()][bin.axial_pos_num()][bin.tangential_pos_num()];
+        std::cout<<uncompressed_bin.axial_pos_num();
+    total_efficiency += view_efficiency*geometric_factors[uncompressed_bin.view_num()][uncompressed_bin.axial_pos_num()][uncompressed_bin.tangential_pos_num()];
       }
     else
       {
