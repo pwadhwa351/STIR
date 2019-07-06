@@ -306,9 +306,9 @@ read_norm_data(const string& filename)
                                  min_tang_pos_num, max_tang_pos_num));
    {
         //std::cout<<"This is the minimum number of views"<<proj_data_info_cyl_ptr->get_min_view_num()<<std::endl;
-        std::cout<<"This is the maximum number of views"<<proj_data_info_cyl_uncompressed_ptr->get_max_view_num()<<std::endl;
-        std::cout<<"This is the minimum tangential position "<<proj_data_info_cyl_uncompressed_ptr->get_min_tangential_pos_num()<<std::endl;
-        std::cout<<"This is the maximum tangential position "<<proj_data_info_cyl_uncompressed_ptr->get_max_tangential_pos_num()<<std::endl;
+       // std::cout<<"This is the maximum number of views"<<proj_data_info_cyl_uncompressed_ptr->get_max_view_num()<<std::endl;
+        //std::cout<<"This is the minimum tangential position "<<proj_data_info_cyl_uncompressed_ptr->get_min_tangential_pos_num()<<std::endl;
+        //std::cout<<"This is the maximum tangential position "<<proj_data_info_cyl_uncompressed_ptr->get_max_tangential_pos_num()<<std::endl;
         ret_array.resize(IndexRange3D(max_num_view_num, max_num_axial_poss, max_num_tangential_poss));
         for(int i_view = 0; i_view <= proj_data_info_cyl_uncompressed_ptr->get_max_view_num(); ++i_view)
         {
@@ -490,8 +490,8 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
   {
 
     float view_efficiency = 0.;
-    std::cout<<start_view<<"This is the start view"<<std::endl;
-    std::cout<<end_view<<"This is the end view"<<std::endl;
+   // std::cout<<start_view<<"This is the start view"<<std::endl;
+   // std::cout<<end_view<<"This is the end view"<<std::endl;
 
     for(uncompressed_bin.view_num() = start_view;
         uncompressed_bin.view_num() < end_view;
@@ -521,8 +521,8 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
       for(uncompressed_bin.segment_num() = min_ring_diff + (min_ring_diff+ring1_plus_ring2)%2; 
           uncompressed_bin.segment_num() <= max_ring_diff; 
           uncompressed_bin.segment_num()+=2 ) {
-        
-        std::cout<<uncompressed_bin.segment_num()<<std::endl;
+        std::cout<<"This is the segment number uncomp_bin"<<uncompressed_bin.segment_num()<<std::endl;
+        std::cout<<"This is the segment number bin"<<bin.segment_num()<<std::endl;
         int geo_plane_num = 
 	  detail::set_detection_axial_coords(proj_data_info_cyl_ptr,
 					     ring1_plus_ring2, uncompressed_bin,
@@ -567,8 +567,7 @@ get_bin_efficiency(const Bin& bin, const double start_time, const double end_tim
     
     if (this->use_geometric_factors())
       {
-        std::cout<<uncompressed_bin.axial_pos_num();
-    total_efficiency += view_efficiency*geometric_factors[uncompressed_bin.view_num()][uncompressed_bin.axial_pos_num()][uncompressed_bin.tangential_pos_num()];
+    total_efficiency += view_efficiency*geometric_factors[uncompressed_bin.view_num()-1][uncompressed_bin.axial_pos_num()][uncompressed_bin.tangential_pos_num()];
       }
     else
       {
