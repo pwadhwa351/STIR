@@ -61,6 +61,7 @@ set(${dir_EXE_SOURCES}
         conv_GATE_raw_ECAT_projdata_to_interfile
         conv_gipl_to_interfile
         conv_interfile_to_gipl
+	create_tofscatter_from_nontofscatter
         shift_image
         shift_image_origin
         read_geo_factors
