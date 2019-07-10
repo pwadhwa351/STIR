@@ -95,66 +95,12 @@ int main(int argc,char **argv)
          bin.axial_pos_num() <= proj_data.get_max_axial_pos_num(bin.segment_num());
          ++bin.axial_pos_num())
       {
-        for (bin.timing_pos_num() = proj_data.get_min_tof_pos_num();
-        bin.timing_pos_num() <= proj_data.get_max_tof_pos_num();
-        ++ bin.timing_pos_num())
-        {
+     //   for (bin.timing_pos_num() = proj_data.get_min_tof_pos_num();
+     //   bin.timing_pos_num() <= proj_data.get_max_tof_pos_num();
+     //   ++ bin.timing_pos_num())
+     //   {
         Sinogram<float> sinogram =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,bin.timing_pos_num());
-        Sinogram<float> sinogram_0 =
           template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,0);
-        Sinogram<float> sinogram_1 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,1);
-        Sinogram<float> sinogram_2 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,2);
-        Sinogram<float> sinogram_3 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,3);
-        Sinogram<float> sinogram_4 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,4);
-        Sinogram<float> sinogram_5 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,5);
-        Sinogram<float> sinogram_6 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,6);
-        Sinogram<float> sinogram_7 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,7);
-        Sinogram<float> sinogram_8 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,8);
-        Sinogram<float> sinogram_9 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,9);
-        Sinogram<float> sinogram_10 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,10);
-        Sinogram<float> sinogram_11 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,11);
-        Sinogram<float> sinogram_12 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,12);
-        Sinogram<float> sinogram_13 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,13);
-        Sinogram<float> sinogram_neg1 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-1);
-        Sinogram<float> sinogram_neg2 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-2);
-        Sinogram<float> sinogram_neg3 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-3);
-        Sinogram<float> sinogram_neg4 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-4);
-        Sinogram<float> sinogram_neg5 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-5);
-        Sinogram<float> sinogram_neg6 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-6);
-        Sinogram<float> sinogram_neg7 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-7);
-        Sinogram<float> sinogram_neg8 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-8);
-        Sinogram<float> sinogram_neg9 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-9);
-        Sinogram<float> sinogram_neg10 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-10);
-        Sinogram<float> sinogram_neg11 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-11);
-        Sinogram<float> sinogram_neg12 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-12);
-        Sinogram<float> sinogram_neg13 =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,-13);
 
         Sinogram<float> non_ToF_sinogram = proj_data_non_tof_ptr->get_sinogram(bin.axial_pos_num(),bin.segment_num(),false,0);
             for (bin.view_num() = proj_data.get_min_view_num();
@@ -166,79 +112,18 @@ int main(int argc,char **argv)
                  bin.tangential_pos_num() <= proj_data.get_max_tangential_pos_num();
                  ++bin.tangential_pos_num())
               {
-                sinogram_0[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.1;
-                sinogram_1[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.103;
-                sinogram_2[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.097;
-                sinogram_3[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.083;
-                sinogram_4[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.063;
-                sinogram_5[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.043;
-                sinogram_6[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.028;
-                sinogram_7[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.02;
-                sinogram_8[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.015;
-                sinogram_9[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.012;
-                sinogram_10[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
-                sinogram_11[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
-                sinogram_12[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.009;
-                sinogram_13[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.009;
-                sinogram_neg1[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.09;
-                sinogram_neg2[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.074;
-                sinogram_neg3[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.057;
-                sinogram_neg4[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.042;
-                sinogram_neg5[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.03;
-                sinogram_neg6[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.022;
-                sinogram_neg7[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.017;
-                sinogram_neg8[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.013;
-                sinogram_neg9[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.011;
-                sinogram_neg10[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
-                sinogram_neg11[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
-                sinogram_neg12[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
-                sinogram_neg13[bin.view_num()][bin.tangential_pos_num()]+=
-                        non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.009;
+
 
                 /*(*segment_ptr)[bin.axial_pos_num()]*/
                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
-                sinogram_0[bin.view_num()][bin.tangential_pos_num()]+sinogram_1[bin.view_num()][bin.tangential_pos_num()]+sinogram_2[bin.view_num()][bin.tangential_pos_num()]+sinogram_3[bin.view_num()][bin.tangential_pos_num()]
-                        +sinogram_4[bin.view_num()][bin.tangential_pos_num()]+sinogram_5[bin.view_num()][bin.tangential_pos_num()]+sinogram_6[bin.view_num()][bin.tangential_pos_num()]
-                        +sinogram_7[bin.view_num()][bin.tangential_pos_num()]+sinogram_8[bin.view_num()][bin.tangential_pos_num()]+sinogram_9[bin.view_num()][bin.tangential_pos_num()]
-                        +sinogram_10[bin.view_num()][bin.tangential_pos_num()]+sinogram_11[bin.view_num()][bin.tangential_pos_num()]+sinogram_12[bin.view_num()][bin.tangential_pos_num()]
-                        +sinogram_13[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg1[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg2[bin.view_num()][bin.tangential_pos_num()]
-                        +sinogram_neg3[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg4[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg5[bin.view_num()][bin.tangential_pos_num()]
-                        +sinogram_neg6[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg7[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg8[bin.view_num()][bin.tangential_pos_num()]
-                        +sinogram_neg9[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg10[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg11[bin.view_num()][bin.tangential_pos_num()]
-                        +sinogram_neg12[bin.view_num()][bin.tangential_pos_num()]+sinogram_neg13[bin.view_num()][bin.tangential_pos_num()];
+                non_ToF_projdata[bin.view_num()][bin.tangential_pos_num()];
                 }
               }
 
 
 
         proj_data.set_sinogram(sinogram);
-        }
+       // }
       }
         }
 
