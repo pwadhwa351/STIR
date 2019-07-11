@@ -95,12 +95,12 @@ int main(int argc,char **argv)
          bin.axial_pos_num() <= proj_data.get_max_axial_pos_num(bin.segment_num());
          ++bin.axial_pos_num())
       {
-     //   for (bin.timing_pos_num() = proj_data.get_min_tof_pos_num();
-     //   bin.timing_pos_num() <= proj_data.get_max_tof_pos_num();
-     //   ++ bin.timing_pos_num())
-     //   {
+        for (bin.timing_pos_num() = proj_data.get_min_tof_pos_num();
+        bin.timing_pos_num() <= proj_data.get_max_tof_pos_num();
+        ++ bin.timing_pos_num())
+        {
         Sinogram<float> sinogram =
-          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,0);
+          template_projdata_info_sptr->get_empty_sinogram(bin.axial_pos_num(),bin.segment_num(),false,bin.timing_pos_num());
 
         Sinogram<float> non_ToF_sinogram = proj_data_non_tof_ptr->get_sinogram(bin.axial_pos_num(),bin.segment_num(),false,0);
             for (bin.view_num() = proj_data.get_min_view_num();
@@ -112,18 +112,185 @@ int main(int argc,char **argv)
                  bin.tangential_pos_num() <= proj_data.get_max_tangential_pos_num();
                  ++bin.tangential_pos_num())
               {
+		if(bin.timing_pos_num() == 0)
+		{
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.1;
+		}
 
-
+		if(bin.timing_pos_num() == 1)
+		{
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.103;
+		}
+		
+		if(bin.timing_pos_num() == 2)
+		{
                 /*(*segment_ptr)[bin.axial_pos_num()]*/
                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
-                non_ToF_projdata[bin.view_num()][bin.tangential_pos_num()];
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.097;
                 }
+
+		 if(bin.timing_pos_num() == 3)
+                {
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.083;
+                }
+
+                if(bin.timing_pos_num() == 4)
+                {
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.063;
+                }
+                
+                if(bin.timing_pos_num() == 5)
+                {
+                /*(*segment_ptr)[bin.axial_pos_num()]*/
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.043;
+                }
+
+   		if(bin.timing_pos_num() == 6)
+                {
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.028;
+                }
+
+                if(bin.timing_pos_num() == 7)
+                {
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.020;
+                }
+                
+                if(bin.timing_pos_num() == 8)
+                {
+                /*(*segment_ptr)[bin.axial_pos_num()]*/
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.015;
+                }
+
+                 if(bin.timing_pos_num() == 9)
+                {
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.012;
+                }
+
+                if(bin.timing_pos_num() == 10)
+                {
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
+                }
+                
+                if(bin.timing_pos_num() == 11)
+                {
+                /*(*segment_ptr)[bin.axial_pos_num()]*/
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
+                }
+		
+		if(bin.timing_pos_num() == 12)
+                {
+		 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.009;
+                }
+                
+                if(bin.timing_pos_num() == 13)
+                {
+                /*(*segment_ptr)[bin.axial_pos_num()]*/
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.009;
+                }
+
+                if(bin.timing_pos_num() == -1)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.09;
+                }
+                
+                if(bin.timing_pos_num() == -2)
+                {
+                /*(*segment_ptr)[bin.axial_pos_num()]*/
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.074;
+                }
+
+                 if(bin.timing_pos_num() == -3)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.057;
+                }
+
+                if(bin.timing_pos_num() == -4)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.042;
+                }
+                
+                if(bin.timing_pos_num() == -5)
+                {
+                /*(*segment_ptr)[bin.axial_pos_num()]*/
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.03;
+                }
+
+                if(bin.timing_pos_num() == -6)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.022;
+                }
+
+                if(bin.timing_pos_num() == -7)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.017;
+                }
+
+ 		if(bin.timing_pos_num() == -8)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.013;
+                }
+
+                if(bin.timing_pos_num() == -9)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.011;
+                }
+
+                if(bin.timing_pos_num() == -10)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
+                }
+                
+                if(bin.timing_pos_num() == -11)
+                {
+                /*(*segment_ptr)[bin.axial_pos_num()]*/
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
+                }
+                
+                if(bin.timing_pos_num() == -12)
+                {
+                 sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.01;
+                }
+                
+                if(bin.timing_pos_num() == -13)
+                {
+                /*(*segment_ptr)[bin.axial_pos_num()]*/
+                sinogram[bin.view_num()][bin.tangential_pos_num()] +=
+                non_ToF_sinogram[bin.view_num()][bin.tangential_pos_num()]*0.009;
+                }
+
+
+		}
               }
 
 
 
         proj_data.set_sinogram(sinogram);
-       // }
+       }
       }
         }
 
