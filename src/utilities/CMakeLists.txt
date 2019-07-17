@@ -56,6 +56,7 @@ set(${dir_EXE_SOURCES}
 	write_proj_matrix_by_bin 
         forward_project
         back_project
+	concatenate_tof_bins_create_tofscatter
 	calculate_attenuation_coefficients 
 	attenuation_coefficients_to_projections 
         conv_GATE_raw_ECAT_projdata_to_interfile
