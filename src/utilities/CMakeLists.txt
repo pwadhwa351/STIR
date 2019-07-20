@@ -64,7 +64,8 @@ set(${dir_EXE_SOURCES}
         conv_gipl_to_interfile
         conv_interfile_to_gipl
 	create_tofscatter_from_nontofscatter
-        shift_image
+        create_hoffmann_tof_scatter_scaling
+	shift_image
         shift_image_origin
         read_geo_factors
         warp_and_accumulate_gated_images
