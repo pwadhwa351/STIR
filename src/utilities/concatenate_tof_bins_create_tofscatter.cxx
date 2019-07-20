@@ -67,7 +67,7 @@ int main(int argc,char **argv)
 	"argv[7]  scatter_tof6\n"
 	"argv[8]  scatter_tof7\n"
 	"argv[9]  scatter_tof8\n"
-	"argv[10]  scatter_tof9\n"
+	"argv[10] scatter_tof9\n"
 	"argv[11] scatter_tof10\n"
 	"argv[12] scatter_tof11\n"
 	"argv[13] scatter_tof12\n"

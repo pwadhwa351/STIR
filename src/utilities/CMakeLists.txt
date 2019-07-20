@@ -53,6 +53,7 @@ set(${dir_EXE_SOURCES}
 	rebin_projdata
 	read_nontof_conv_tof 
 	read_tofbin_conv_nontof
+	read_multfactors_create_tof
 	write_proj_matrix_by_bin 
         forward_project
         back_project
